@@ -1,0 +1,22 @@
+﻿{
+	"Tasks": [
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.AddImageAsNewPage"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ConvertEmbeddedImagesToPages"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractAttachments"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.MergeEmbeddedPdfDocuments"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.RemoveAttachments"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.AddFooter"
+		}
+	]
+}
