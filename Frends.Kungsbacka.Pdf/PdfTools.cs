@@ -110,23 +110,31 @@ namespace Frends.Kungsbacka.Pdf
                 regex = GetRegexFromPattern(pattern);
             }
             var list = new List<PdfAttachment>();
-            for (int i = 0; i < fileSpecArray.Size();)
+            int size = fileSpecArray.Size();
+            if (size < 2)
+            {
+                return list.AsEnumerable();
+            }
+            for (int i = 0; i < size;)
             {
                 fileSpecArray.GetAsString(i++);
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i++);
-                PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
-                PdfStream stream = GetStream(refs);
-                string fileName = GetFileName(fileSpec);
-                if (stream != null)
+                if (fileSpec != null)
                 {
-                    if (regex == null || regex.IsMatch(fileName))
+                    PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
+                    PdfStream stream = GetStream(refs);
+                    string fileName = GetFileName(fileSpec);
+                    if (stream != null)
                     {
-                        list.Add(new PdfAttachment()
+                        if (regex == null || regex.IsMatch(fileName))
                         {
-                            Name = fileName,
-                            Extension = System.IO.Path.GetExtension(fileName),
-                            Data = stream.GetBytes()
-                        });
+                            list.Add(new PdfAttachment()
+                            {
+                                Name = fileName,
+                                Extension = System.IO.Path.GetExtension(fileName),
+                                Data = stream.GetBytes()
+                            });
+                        }
                     }
                 }
             }
@@ -152,7 +160,12 @@ namespace Frends.Kungsbacka.Pdf
                 regex = GetRegexFromPattern(pattern);
             }
             var list = new List<string>();
-            for (int i = 0; i < fileSpecArray.Size();)
+            int size = fileSpecArray.Size();
+            if (size < 2)
+            {
+                return list.AsEnumerable();
+            }
+            for (int i = 0; i < size;)
             {
                 fileSpecArray.GetAsString(i++);
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i++);
@@ -259,6 +272,10 @@ namespace Frends.Kungsbacka.Pdf
 
         private static string GetFileName(PdfDictionary dict)
         {
+            if (dict == null)
+            {
+                return null;
+            }
             if (dict.ContainsKey(PdfName.UF))
             {
                 return dict.GetAsString(PdfName.UF).ToString();
@@ -268,6 +285,10 @@ namespace Frends.Kungsbacka.Pdf
 
         private static PdfStream GetStream(PdfDictionary dict)
         {
+            if (dict == null)
+            {
+                return null;
+            }
             if (dict.ContainsKey(PdfName.UF))
             {
                 return dict.GetAsStream(PdfName.UF);

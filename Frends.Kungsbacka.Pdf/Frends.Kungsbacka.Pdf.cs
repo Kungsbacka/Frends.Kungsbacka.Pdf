@@ -69,21 +69,26 @@ namespace Frends.Kungsbacka.Pdf
             var pdf = new Pdf(input.PdfDocument);
             foreach (PdfAttachment attachedImage in PdfTools.ExtractAttachments(pdf.Document, pattern))
             {
+                bool success = true;
                 try
                 {
                     PdfTools.AddImageAsNewPage(
                         pdf.Document,
                         attachedImage.Data,
-                        options.Caption?.Replace("[FILENAME]", attachedImage.Name)
+                        options?.Caption?.Replace("[FILENAME]", attachedImage.Name)
                     );
                 }
                 catch (InvalidImageDataException)
                 {
+                    success = false;
                     // We ignore this exception to make it easier
                     // to use this task without knowing the type of
                     // all embedded files.
                 }
-                PdfTools.RemoveAttachment(pdf.Document, attachedImage.Name);
+                if (success)
+                {
+                    PdfTools.RemoveAttachment(pdf.Document, attachedImage.Name);
+                }
             }
             var output = new PdfDocumentResult
             {
