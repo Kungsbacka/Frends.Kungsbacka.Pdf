@@ -113,22 +113,5 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var result = PdfTasks.AddFooter(input);
             TestHelper.SaveResult("add-footer-test-result.pdf", result.PdfDocument);
         }
-
-
-        [Test]
-        public void CustomTest()
-        {
-            var pdf = System.IO.File.ReadAllBytes(@"C:\Temp\arende.pdf");
-
-            var r1 = PdfTasks.ExtractAttachments(new PdfDocumentInput() { PdfDocument = pdf }, new PdfCommonOptions() { Filter = "Signeringsunderlag.pdf" });
-
-            var r2 = PdfTasks.ConvertEmbeddedImagesToPages(new PdfDocumentInput() { PdfDocument = r1.Attachments.First().Data }, null);
-
-            var r3 = PdfTasks.MergeEmbeddedPdfDocuments(new PdfDocumentInput() { PdfDocument = r2.PdfDocument }, null);
-
-            var r4 = PdfTasks.RemoveAttachments(new PdfDocumentInput() { PdfDocument = r3.PdfDocument }, new PdfCommonOptions() { Filter = "*.pdf" });
-
-            System.IO.File.WriteAllBytes(@"C:\Temp\arende-e.pdf", r4.PdfDocument);
-        }
     }
 }

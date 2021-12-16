@@ -111,14 +111,13 @@ namespace Frends.Kungsbacka.Pdf
             }
             var list = new List<PdfAttachment>();
             int size = fileSpecArray.Size();
-            if (size < 2)
+            if (size % 2 != 0)
             {
                 return list.AsEnumerable();
             }
-            for (int i = 0; i < size;)
+            for (int i = 0; i < size; i += 2)
             {
-                fileSpecArray.GetAsString(i++);
-                PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i++);
+                PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
                 if (fileSpec != null)
                 {
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
@@ -161,14 +160,13 @@ namespace Frends.Kungsbacka.Pdf
             }
             var list = new List<string>();
             int size = fileSpecArray.Size();
-            if (size < 2)
+            if (size % 2 != 0)
             {
                 return list.AsEnumerable();
             }
-            for (int i = 0; i < size;)
+            for (int i = 0; i < size; i += 2)
             {
-                fileSpecArray.GetAsString(i++);
-                PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i++);
+                PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
                 string fileName = GetFileName(fileSpec);
                 if (fileName != null)
                 {
@@ -196,22 +194,30 @@ namespace Frends.Kungsbacka.Pdf
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
             if (fileSpecArray != null)
             {
-                var list = new List<PdfObject>();
-                for (int i = 0; i < fileSpecArray.Size(); i++)
+                var list = new List<int>();
+                int size = fileSpecArray.Size();
+                if (size % 2 != 0)
                 {
-                    PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i);
+                    return;
+                }
+                for (int i = 0; i < size; i += 2)
+                {
+                    PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
                     if (fileSpec != null)
                     {
                         string fileName = GetFileName(fileSpec);
                         if (fileName.Equals(name))
                         {
-                            list.Add(fileSpecArray.Get(i));
+                            list.Add(i);
+                            list.Add(i + 1);
                         }
                     }
                 }
-                foreach (PdfObject fileSpec in list)
+                // Sort descending so we don't change indexes when removing.
+                list.Sort((a, b) => b.CompareTo(a));
+                foreach (int index in list)
                 {
-                    fileSpecArray.Remove(fileSpec);
+                    fileSpecArray.Remove(index);
                 }
             }
             PdfDictionary root = pdfDocument.GetCatalog().GetPdfObject();
