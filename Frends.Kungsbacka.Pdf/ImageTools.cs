@@ -19,18 +19,11 @@ namespace Frends.Kungsbacka.Pdf
         /// the two and always return a Jpeg if a rotation is performed.
         /// </summary>
         /// <param name="imageBytes">Image data</param>
-        /// <returns>Image data as Jpeg if the image has been rotated, otherwise the image data is returned unchanged.</returns>
+        /// <returns>Image data as Jpeg if the image has been rotated, 
+        /// otherwise the image data is returned unchanged.</returns>
         public static byte[] RotateImage(byte[] imageBytes)
         {
-            RotateFlipType rotateFlip;
-            try
-            {
-                rotateFlip = CalculateTransformation(imageBytes); // ImageProcessingException "File format could not be determined"
-            }
-            catch (ImageProcessingException ex)
-            {
-                throw NewInvalidImageDataException(ex);
-            }
+            RotateFlipType rotateFlip = CalculateTransformation(imageBytes);
             if (rotateFlip == RotateFlipType.RotateNoneFlipNone)
             {
                 return imageBytes;
@@ -39,9 +32,9 @@ namespace Frends.Kungsbacka.Pdf
             Image image = null;
             try
             {
-                image = Image.FromStream(sourceStream); // ArgumentException "The stream does not have a valid image format"
+                image = Image.FromStream(sourceStream); 
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) // "The stream does not have a valid image format"
             {
                 throw NewInvalidImageDataException(ex);
             }
@@ -49,9 +42,9 @@ namespace Frends.Kungsbacka.Pdf
             using var destStream = new MemoryStream();
             try
             {
-                image.Save(destStream, ImageFormat.Jpeg); // ExternalException "The image was saved with the wrong image format"
+                image.Save(destStream, ImageFormat.Jpeg); 
             }
-            catch(System.Runtime.InteropServices.ExternalException ex)
+            catch(System.Runtime.InteropServices.ExternalException ex) // "The image was saved with the wrong image format"
             {
                 throw NewInvalidImageDataException(ex);
             }
@@ -66,11 +59,16 @@ namespace Frends.Kungsbacka.Pdf
             switch (orientation)
             {
                 case 3:
-                case 4: rotateFlip = RotateFlipType.Rotate180FlipNone; break;
+                case 4: rotateFlip = RotateFlipType.Rotate180FlipNone;
+                    break;
                 case 5:
-                case 6: rotateFlip = RotateFlipType.Rotate90FlipNone; break;
+                case 6: rotateFlip = RotateFlipType.Rotate90FlipNone;
+                    break;
                 case 7:
-                case 8: rotateFlip = RotateFlipType.Rotate270FlipNone; break;
+                case 8: rotateFlip = RotateFlipType.Rotate270FlipNone;
+                    break;
+                default:
+                    break;
             }
             if (orientation == 2 || orientation == 4 || orientation == 5 || orientation == 7)
             {
@@ -92,20 +90,21 @@ namespace Frends.Kungsbacka.Pdf
         private static int GetOrientation(byte[] imageBytes)
         {
             using var ms = new MemoryStream(imageBytes);
-            //try
             {
                 var md = ImageMetadataReader.ReadMetadata(ms);
                 var exif = md.OfType<ExifIfd0Directory>().FirstOrDefault();
                 if (exif != null)
                 {
-                    return exif.GetInt16(ExifDirectoryBase.TagOrientation);
+                    try
+                    {
+                        return exif.GetInt16(ExifDirectoryBase.TagOrientation);
+                    }
+                    catch (MetadataException)
+                    {
+                        // Information about orientation could not be found
+                    }
                 }
-
             }
-            //catch (ImageProcessingException)
-            //{
-            //    throw new ArgumentException("Supplied image data cannot be converted to an image.");
-            //}
             return 0;
         }
 
