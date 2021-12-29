@@ -23,7 +23,15 @@ namespace Frends.Kungsbacka.Pdf
         /// otherwise the image data is returned unchanged.</returns>
         public static byte[] RotateImage(byte[] imageBytes)
         {
-            RotateFlipType rotateFlip = CalculateTransformation(imageBytes);
+            RotateFlipType rotateFlip;
+            try
+            {
+                 rotateFlip = CalculateTransformation(imageBytes);
+            }
+            catch (ImageProcessingException ex)
+            {
+                throw NewInvalidImageDataException(ex);
+            }
             if (rotateFlip == RotateFlipType.RotateNoneFlipNone)
             {
                 return imageBytes;
@@ -78,7 +86,7 @@ namespace Frends.Kungsbacka.Pdf
         }
 
         // https://exiftool.org/TagNames/EXIF.html
-        // 0 = No orientation information found
+        // 0 = No orientation information found or bad image data
         // 1 = Horizontal (normal)
         // 2 = Mirror horizontal
         // 3 = Rotate 180
@@ -92,18 +100,15 @@ namespace Frends.Kungsbacka.Pdf
             using var ms = new MemoryStream(imageBytes);
             {
                 var md = ImageMetadataReader.ReadMetadata(ms);
-                var exif = md.OfType<ExifIfd0Directory>().FirstOrDefault();
-                if (exif != null)
+                try
                 {
-                    try
+                    var exif = md.OfType<ExifIfd0Directory>().FirstOrDefault();
+                    if (exif != null)
                     {
                         return exif.GetInt16(ExifDirectoryBase.TagOrientation);
                     }
-                    catch (MetadataException)
-                    {
-                        // Information about orientation could not be found
-                    }
                 }
+                catch { } // No EXIF or no information about orientation.
             }
             return 0;
         }
