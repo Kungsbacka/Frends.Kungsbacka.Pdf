@@ -268,12 +268,35 @@ namespace Frends.Kungsbacka.Pdf
 
         private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
-            return pdfDocument
+            var array = pdfDocument
                 ?.GetCatalog()
                 ?.GetPdfObject()
                 ?.GetAsDictionary(PdfName.Names)
                 ?.GetAsDictionary(PdfName.EmbeddedFiles)
                 ?.GetAsArray(PdfName.Names);
+            if (array != null)
+            {
+                return array;
+            }
+            // When there are lots of embedded files, they get split up
+            // into multiple dictionaries (kids).
+            array = pdfDocument
+                ?.GetCatalog()
+                ?.GetPdfObject()
+                ?.GetAsDictionary(PdfName.Names)
+                ?.GetAsDictionary(PdfName.EmbeddedFiles)
+                ?.GetAsArray(PdfName.Kids);            
+            if (array != null)
+            {
+                var combined = new PdfArray();
+                foreach (PdfDictionary dict in array)
+                {
+                    combined.AddAll(dict.GetAsArray(PdfName.Names));
+                }
+
+                return combined.Count() == 0 ? null : combined;
+            }
+            return null;
         }
 
         private static string GetFileName(PdfDictionary dict)
