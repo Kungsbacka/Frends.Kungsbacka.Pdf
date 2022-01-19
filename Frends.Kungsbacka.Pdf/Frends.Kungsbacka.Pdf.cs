@@ -243,7 +243,10 @@ namespace Frends.Kungsbacka.Pdf
             {
                 IRandomAccessSource source = new RandomAccessSourceFactory().CreateSource(pdfBytes);
                 _outputStream = new ByteArrayOutputStream();
-                _document = new PdfDocument(new PdfReader(source, new ReaderProperties()), new PdfWriter(_outputStream));
+                var pdfReader = new PdfReader(source, new ReaderProperties());
+                // Avoid "PdfReader is not opened with owner password" errors
+                pdfReader.SetUnethicalReading(true);
+                _document = new PdfDocument(pdfReader, new PdfWriter(_outputStream));
             }
 
             public byte[] ToArray()
