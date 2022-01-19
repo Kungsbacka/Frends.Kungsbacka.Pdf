@@ -83,8 +83,8 @@ namespace Frends.Kungsbacka.Pdf
         {
             // Make sure the documents can be merged by setting Unethical Reading to true
             // This avoids the error "PdfReader is not opened with owner password"
-            //pdfDocument1.GetReader().SetUnethicalReading(true);
-            //pdfDocument2.GetReader().SetUnethicalReading(true);
+            pdfDocument1.GetReader().SetUnethicalReading(true);
+            pdfDocument2.GetReader().SetUnethicalReading(true);
             PdfMerger merger = new PdfMerger(pdfDocument1);
             merger.Merge(pdfDocument2, 1, pdfDocument2.GetNumberOfPages());
             return pdfDocument1;
