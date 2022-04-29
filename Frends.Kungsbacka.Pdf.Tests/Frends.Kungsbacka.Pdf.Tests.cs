@@ -57,7 +57,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
                 Filter = "*"
             };
             var result = PdfTasks.ExtractAttachments(input, options);
-            Assert.AreEqual(5, result.Attachments.Count());
+            Assert.AreEqual(6, result.Attachments.Count());
         }
 
         /// <summary>
@@ -77,6 +77,25 @@ namespace Frends.Kungsbacka.Pdf.Tests
             };
             var result = PdfTasks.AddImageAsNewPage(input, options);
             TestHelper.SaveResult("add-image-as-new-page-test-result.pdf", result.PdfDocument);
+        }
+
+        /// <summary>
+        /// Test AddImageAsNewPage
+        /// </summary>
+        [Test]
+        public void AddRotatedImageAsNewPageTest()
+        {
+            var input = new AddImageInput
+            {
+                PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.WithAttachments),
+                Image = TestHelper.GetRotatedImage()
+            };
+            var options = new AddImageOptions()
+            {
+                Caption = "Right side up!"
+            };
+            var result = PdfTasks.AddImageAsNewPage(input, options);
+            TestHelper.SaveResult("add-rotated-image-as-new-page-test-result.pdf", result.PdfDocument);
         }
 
         /// <summary>

@@ -34,6 +34,10 @@ namespace Frends.Kungsbacka.Pdf
         {
             bool addText = !string.IsNullOrWhiteSpace(caption);
             imageBytes = ImageTools.RotateImage(imageBytes);
+            if (imageBytes == null)
+            {
+                return;
+            }
             ImageData image = ImageDataFactory.Create(imageBytes, true);
             float imageWidth = image.GetWidth();
             float imageHeight = image.GetHeight();

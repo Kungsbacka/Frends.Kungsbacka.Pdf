@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace Frends.Kungsbacka.Pdf.Tests
@@ -38,6 +34,10 @@ namespace Frends.Kungsbacka.Pdf.Tests
         public static byte[] GetImage()
         {
             return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", "ocean1.jpg"));
+        }
+        public static byte[] GetRotatedImage()
+        {
+            return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", "rotated.jpg"));
         }
     }
 }

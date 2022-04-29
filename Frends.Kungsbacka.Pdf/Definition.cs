@@ -99,6 +99,9 @@ namespace Frends.Kungsbacka.Pdf
         public string Filter { get; set; }
     }
 
+    /// <summary>
+    /// Required parameters for task AddFooter
+    /// </summary>
     public class AddFooterInput
     {
         /// <summary>
