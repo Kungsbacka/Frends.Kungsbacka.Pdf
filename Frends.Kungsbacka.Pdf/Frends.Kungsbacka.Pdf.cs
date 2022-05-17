@@ -162,7 +162,7 @@ namespace Frends.Kungsbacka.Pdf
             var pdf = new Pdf(input.PdfDocument);
             var output = new ExtractAttachmentsResult
             {
-                Attachments = PdfTools.ExtractAttachments(pdf.Document, pattern)
+                Attachments = PdfTools.ExtractAttachments(pdf.Document, pattern, options.ExtractOepPrefix)
             };
             return output;
         }
