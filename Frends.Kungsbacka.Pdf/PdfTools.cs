@@ -105,7 +105,8 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         /// <param name="pdfDocument">Pdf document to extract from</param>
         /// <param name="pattern">Optional filter for file names</param>
-        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "")
+        /// <param name="extractOepPrefix">Optional boolean for extracting oep prefixes from the description</param>
+        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
             if (fileSpecArray == null)
@@ -131,6 +132,9 @@ namespace Frends.Kungsbacka.Pdf
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
                     PdfStream stream = GetStream(refs);
                     string fileName = GetFileName(fileSpec);
+
+                    string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
+
                     if (stream != null)
                     {
                         if (regex == null || regex.IsMatch(fileName))
@@ -139,13 +143,34 @@ namespace Frends.Kungsbacka.Pdf
                             {
                                 Name = fileName,
                                 Extension = System.IO.Path.GetExtension(fileName),
-                                Data = stream.GetBytes()
+                                Data = stream.GetBytes(),
+                                OepPrefix = oepPrefix
                             });
                         }
                     }
                 }
             }
             return list.AsEnumerable();
+        }
+
+        private static string GetOepFilePrefix(PdfDictionary dict, string fileName)
+        {
+            if (dict.ContainsKey(PdfName.Desc))
+            {
+                var description = dict.GetAsString(PdfName.Desc).ToString();
+                if (string.IsNullOrEmpty(description)) return string.Empty;
+
+                //Prefix comes from oep like this: "GM image.PNG" with GM as the prefix followed by the filename
+                //If no prefix is setup in oep, the filename isn´t included in the description which means we can strip the filename from the description to get the prefix
+                if (!description.Contains(fileName)) return string.Empty;
+
+                var oepPrefix = description.Replace(fileName, string.Empty);
+                if (string.IsNullOrEmpty(oepPrefix)) return string.Empty;
+
+                return oepPrefix.TrimEnd();
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
