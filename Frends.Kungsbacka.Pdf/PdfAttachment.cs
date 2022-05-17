@@ -15,6 +15,10 @@
         /// </summary>
         public string Extension { get; set; }
         /// <summary>
+        /// File prefix
+        /// </summary>
+        public string OepPrefix { get; set; }
+        /// <summary>
         /// File contents
         /// </summary>
         public byte[] Data { get; set; }

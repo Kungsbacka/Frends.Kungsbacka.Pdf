@@ -25,6 +25,11 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string Filter { get; set; }
+        /// <summary>
+        /// Extract prefix from PDF description
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Boolean")]
+        public bool ExtractOepPrefix { get; set; }
     }
 
     /// <summary>
