@@ -121,4 +121,99 @@ namespace Frends.Kungsbacka.Pdf
         [DisplayFormat(DataFormatString = "Text")]
         public string Text { get; set; }
     }
+    /// <summary>
+    /// Required parameters for task ConvertHtmlToPdfInput
+    /// </summary>
+    public class ConvertHtmlToPdfInput
+    {
+        /// <summary>
+        /// Html string
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string Html { get; set; }
+
+        /// <summary>
+        /// Pdf title
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Pdf header, pass settings as json.
+        /// Available settings and example:
+        /// {
+        ///     "LeftText": "Left header text",
+        ///     "CenterText": "Center header text",
+        ///     "RightText": "Right header text",
+        ///     "DisplayLine": "true",
+        ///     "FontName": "Arial",
+        ///     "FontSize": "14.0",
+        ///     "Spacing": "2"
+        /// }
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string PdfHeader { get; set; }
+
+        /// <summary>
+        /// Pdf footer, pass settings as json.
+        /// Available settings and example:
+        /// {
+        ///     "LeftText": "Left footer text",
+        ///     "CenterText": "Center footer text",
+        ///     "RightText": "Right footer text",
+        ///     "DisplayLine": "true",
+        ///     "FontName": "Arial",
+        ///     "FontSize": "14.0",
+        ///     "Spacing": "2"
+        /// }
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string PdfFooter { get; set; }
+
+        /// <summary>
+        /// Pdf orientation (default "Portrait")
+        /// Available settings:
+        /// "Portrait"
+        /// "Landscape"
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string Orientation { get; set; }
+
+        /// <summary>
+        /// Pdf pagesize (default A4)
+        /// Available settings:
+        /// A0,
+        /// A1,
+        /// A2,
+        /// A3,
+        /// A4,
+        /// A5,
+        /// A6,
+        /// A7,
+        /// A8,
+        /// A9,
+        /// B0,
+        /// B1,
+        /// B2,
+        /// B3,
+        /// B4,
+        /// B5,
+        /// B6,
+        /// B7,
+        /// B8,
+        /// B9,
+        /// B10,
+        /// C5E,
+        /// Comm10E,
+        /// DLE,
+        /// Executive,
+        /// Folio,
+        /// Ledger,
+        /// Legal,
+        /// Letter,
+        /// Tabloid
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string PageSize { get; set; }
+    }
 }

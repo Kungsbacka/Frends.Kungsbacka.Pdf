@@ -1,8 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Threading;
+using System.Threading.Tasks;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
+using Newtonsoft.Json;
+using PugPdf.Core;
+using PdfDocument = iText.Kernel.Pdf.PdfDocument;
 
 namespace Frends.Kungsbacka.Pdf
 {
@@ -218,6 +221,55 @@ namespace Frends.Kungsbacka.Pdf
             return new PdfDocumentResult
             {
                 PdfDocument = pdf.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Converts html string to pdf document.
+        /// </summary>
+        /// <param name="input">Mandatory parameters</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
+        public static async Task<PdfDocumentResult> ConvertHtmlToPdf([PropertyTab] ConvertHtmlToPdfInput input)
+        {
+            if (input is null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+            if (string.IsNullOrEmpty(input.Html))
+            {
+                throw new ArgumentNullException(nameof(input.Html));
+            }
+
+            var renderer = new HtmlToPdf();
+            renderer.PrintOptions.Title = input.Title;
+
+            if (!string.IsNullOrEmpty(input.PdfHeader))
+            {
+                renderer.PrintOptions.Header = JsonConvert.DeserializeObject<PdfHeader>(input.PdfHeader);
+            }
+
+            if (!string.IsNullOrEmpty(input.PdfFooter))
+            {
+                renderer.PrintOptions.Footer = JsonConvert.DeserializeObject<PdfFooter>(input.PdfFooter);
+            }
+
+            if (!string.IsNullOrEmpty(input.Orientation) && Enum.TryParse(input.Orientation, out PdfOrientation orientation))
+            {
+                renderer.PrintOptions.Orientation = orientation;
+            }
+
+            if (!string.IsNullOrEmpty(input.PageSize) && Enum.TryParse(input.PageSize, out PdfPageSize pageSize))
+            {
+                renderer.PrintOptions.PageSize = pageSize;
+            }
+
+            var pdf = await renderer.RenderHtmlAsPdfAsync(input.Html);
+
+            return new PdfDocumentResult
+            {
+                PdfDocument = pdf.BinaryData
             };
         }
 
