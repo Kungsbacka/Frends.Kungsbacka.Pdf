@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -130,5 +131,75 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var result = PdfTasks.AddFooter(input);
             TestHelper.SaveResult("add-footer-test-result.pdf", result.PdfDocument);
         }
+        //Need to have the wkhtmltopdf folder copied over to "Frends.Kungsbacka.Pdf.Tests\bin\Debug\net471" for these tests to work
+        //[Test]
+        //public async Task ConvertHtmlToPdfHtmlOnly()
+        //{
+        //    var input = new ConvertHtmlToPdfInput
+        //    {
+        //        Html = TestHelper.ConvertHtmlToPdfHtml()
+        //    };
+
+        //    var result = await PdfTasks.ConvertHtmlToPdf(input);
+
+        //    TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnly-test-result.pdf", result.PdfDocument);
+        //}
+
+        //[Test]
+        //public async Task ConvertHtmlToPdfHtmlWithHeader()
+        //{
+        //    var input = new ConvertHtmlToPdfInput
+        //    {
+        //        Html = TestHelper.ConvertHtmlToPdfHtml(),
+        //        PdfHeader = TestHelper.ConvertHtmlToPdfPdfHeader()
+        //    };
+
+        //    var result = await PdfTasks.ConvertHtmlToPdf(input);
+
+        //    TestHelper.SaveResult("ConvertHtmlToPdfHtmlWithHeader-test-result.pdf", result.PdfDocument);
+        //}
+
+        //[Test]
+        //public async Task ConvertHtmlToPdfHtmlWithFooterAndHeader()
+        //{
+        //    var input = new ConvertHtmlToPdfInput
+        //    {
+        //        Html = TestHelper.ConvertHtmlToPdfHtml(),
+        //        PdfHeader = TestHelper.ConvertHtmlToPdfPdfHeader(),
+        //        PdfFooter = TestHelper.ConvertHtmlToPdfPdfFooter()
+        //    };
+
+        //    var result = await PdfTasks.ConvertHtmlToPdf(input);
+
+        //    TestHelper.SaveResult("ConvertHtmlToPdfHtmlWithFooterAndHeader-test-result.pdf", result.PdfDocument);
+        //}
+
+        //[Test]
+        //public async Task ConvertHtmlToPdfHtmlOnlyLandscape()
+        //{
+        //    var input = new ConvertHtmlToPdfInput
+        //    {
+        //        Html = TestHelper.ConvertHtmlToPdfHtml(),
+        //        Orientation = "Landscape"
+        //    };
+
+        //    var result = await PdfTasks.ConvertHtmlToPdf(input);
+
+        //    TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyLandscape-test-result.pdf", result.PdfDocument);
+        //}
+
+        //[Test]
+        //public async Task ConvertHtmlToPdfHtmlOnlyB5PageSize()
+        //{
+        //    var input = new ConvertHtmlToPdfInput
+        //    {
+        //        Html = TestHelper.ConvertHtmlToPdfHtml(),
+        //        PageSize = "B5"
+        //    };
+
+        //    var result = await PdfTasks.ConvertHtmlToPdf(input);
+
+        //    TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyB5PageSize-test-result.pdf", result.PdfDocument);
+        //}
     }
 }
