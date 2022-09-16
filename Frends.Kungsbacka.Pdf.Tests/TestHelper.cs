@@ -100,29 +100,5 @@ namespace Frends.Kungsbacka.Pdf.Tests
 					</body>
 					</html>";
         }
-        public static string ConvertHtmlToPdfPdfHeader()
-        {
-            return @"{
-                ""LeftText"": ""Left header"",
-                ""CenterText"": ""Center header"",
-                ""RightText"": ""Right header"",
-                ""DisplayLine"": ""true"",
-                ""FontName"": ""Arial"",
-                ""FontSize"": ""14.0"",
-                ""Spacing"": ""2""
-            }";
-        }
-        public static string ConvertHtmlToPdfPdfFooter()
-        {
-            return @"{
-                ""LeftText"": ""Left footer"",
-                ""CenterText"": ""Center footer"",
-                ""RightText"": ""Right footer"",
-                ""DisplayLine"": ""true"",
-                ""FontName"": ""Arial"",
-                ""FontSize"": ""13.0"",
-                ""Spacing"": ""5""
-            }";
-        }
     }
 }
