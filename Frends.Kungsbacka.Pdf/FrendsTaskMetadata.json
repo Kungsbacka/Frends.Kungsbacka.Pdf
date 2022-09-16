@@ -17,6 +17,9 @@
 		},
 		{
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.AddFooter"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ConvertHtmlToPdf"
 		}
 	]
 }
