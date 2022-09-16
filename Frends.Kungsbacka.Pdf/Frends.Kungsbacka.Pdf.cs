@@ -1,18 +1,16 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using Frends.Kungsbacka.Pdf.HtmlToPdf;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
-using Newtonsoft.Json;
-using PugPdf.Core;
+using System;
+using System.ComponentModel;
 using PdfDocument = iText.Kernel.Pdf.PdfDocument;
 
 namespace Frends.Kungsbacka.Pdf
 {
-    /// <summary>
-    /// Implements Pdf related tasks
-    /// </summary>
-    public static class PdfTasks
+	/// <summary>
+	/// Implements Pdf related tasks
+	/// </summary>
+	public static class PdfTasks
     {
         /// <summary>
         /// Adds an image to a new page after the last page.
@@ -231,7 +229,7 @@ namespace Frends.Kungsbacka.Pdf
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
-        public static async Task<PdfDocumentResult> ConvertHtmlToPdf([PropertyTab] ConvertHtmlToPdfInput input)
+        public static PdfDocumentResult ConvertHtmlToPdf([PropertyTab] ConvertHtmlToPdfInput input)
         {
             if (input is null)
             {
@@ -242,34 +240,13 @@ namespace Frends.Kungsbacka.Pdf
                 throw new ArgumentNullException(nameof(input.Html));
             }
 
-            var renderer = new HtmlToPdf();
-            renderer.PrintOptions.Title = input.Title;
+            var converter = new HtmlToPdfConverter(input);
 
-            if (!string.IsNullOrEmpty(input.PdfHeader))
-            {
-                renderer.PrintOptions.Header = JsonConvert.DeserializeObject<PdfHeader>(input.PdfHeader);
-            }
-
-            if (!string.IsNullOrEmpty(input.PdfFooter))
-            {
-                renderer.PrintOptions.Footer = JsonConvert.DeserializeObject<PdfFooter>(input.PdfFooter);
-            }
-
-            if (!string.IsNullOrEmpty(input.Orientation) && Enum.TryParse(input.Orientation, out PdfOrientation orientation))
-            {
-                renderer.PrintOptions.Orientation = orientation;
-            }
-
-            if (!string.IsNullOrEmpty(input.PageSize) && Enum.TryParse(input.PageSize, out PdfPageSize pageSize))
-            {
-                renderer.PrintOptions.PageSize = pageSize;
-            }
-
-            var pdf = await renderer.RenderHtmlAsPdfAsync(input.Html);
+            var pdf = converter.RenderHtmlAsPdf(input.Html);
 
             return new PdfDocumentResult
             {
-                PdfDocument = pdf.BinaryData
+                PdfDocument = pdf
             };
         }
 

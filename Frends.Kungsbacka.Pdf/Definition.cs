@@ -28,7 +28,7 @@ namespace Frends.Kungsbacka.Pdf
         /// <summary>
         /// Extract prefix from PDF description
         /// </summary>
-        [DisplayFormat(DataFormatString = "Boolean")]
+        [DisplayFormat(DataFormatString = "Text")]
         public bool ExtractOepPrefix { get; set; }
     }
 
@@ -133,49 +133,16 @@ namespace Frends.Kungsbacka.Pdf
         public string Html { get; set; }
 
         /// <summary>
-        /// Pdf title
+        /// Pdfdocument title
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string Title { get; set; }
 
         /// <summary>
-        /// Pdf header, pass settings as json.
-        /// Available settings and example:
-        /// {
-        ///     "LeftText": "Left header text",
-        ///     "CenterText": "Center header text",
-        ///     "RightText": "Right header text",
-        ///     "DisplayLine": "true",
-        ///     "FontName": "Arial",
-        ///     "FontSize": "14.0",
-        ///     "Spacing": "2"
-        /// }
+        /// Orientation of document.
+        /// Available settings: 'Portrait', 'Landscape'
         /// </summary>
-        [DisplayFormat(DataFormatString = "Text")]
-        public string PdfHeader { get; set; }
-
-        /// <summary>
-        /// Pdf footer, pass settings as json.
-        /// Available settings and example:
-        /// {
-        ///     "LeftText": "Left footer text",
-        ///     "CenterText": "Center footer text",
-        ///     "RightText": "Right footer text",
-        ///     "DisplayLine": "true",
-        ///     "FontName": "Arial",
-        ///     "FontSize": "14.0",
-        ///     "Spacing": "2"
-        /// }
-        /// </summary>
-        [DisplayFormat(DataFormatString = "Text")]
-        public string PdfFooter { get; set; }
-
-        /// <summary>
-        /// Pdf orientation (default "Portrait")
-        /// Available settings:
-        /// "Portrait"
-        /// "Landscape"
-        /// </summary>
+        /// 
         [DisplayFormat(DataFormatString = "Text")]
         public string Orientation { get; set; }
 
@@ -215,5 +182,12 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string PageSize { get; set; }
+
+        /// <summary>
+        /// Path to wkhtmltopdf executable.
+        /// The default path is 'C:\Program Files\wkhtmltox\bin\wkhtmltopdf.exe'
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string ExecutablePath { get; set; }
     }
 }
