@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using iText.IO.Source;
+using iText.Kernel.Pdf;
 using NUnit.Framework;
 
 namespace Frends.Kungsbacka.Pdf.Tests
@@ -100,5 +103,41 @@ namespace Frends.Kungsbacka.Pdf.Tests
 					</body>
 					</html>";
         }
-    }
+		public static PdfDocument BytesToPdf(byte[] pdfBytes)
+		{
+			IRandomAccessSource source = new RandomAccessSourceFactory().CreateSource(pdfBytes);
+			var pdfReader = new PdfReader(source, new ReaderProperties());
+			return new PdfDocument(pdfReader, new PdfWriter(new ByteArrayOutputStream()));
+		}
+		public static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
+		{
+			var array = pdfDocument
+				?.GetCatalog()
+				?.GetPdfObject()
+				?.GetAsDictionary(PdfName.Names)
+				?.GetAsDictionary(PdfName.EmbeddedFiles)
+				?.GetAsArray(PdfName.Names);
+			if (array != null)
+			{
+				return array;
+			}
+			array = pdfDocument
+				?.GetCatalog()
+				?.GetPdfObject()
+				?.GetAsDictionary(PdfName.Names)
+				?.GetAsDictionary(PdfName.EmbeddedFiles)
+				?.GetAsArray(PdfName.Kids);
+			if (array != null)
+			{
+				var combined = new PdfArray();
+				foreach (PdfDictionary dict in array)
+				{
+					combined.AddAll(dict.GetAsArray(PdfName.Names));
+				}
+
+				return combined.Count() == 0 ? null : combined;
+			}
+			return null;
+		}
+	}
 }

@@ -1,10 +1,10 @@
 using NUnit.Framework;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
-    [TestFixture]
+	[TestFixture]
     class TestClass
     {
         /// <summary>
@@ -23,12 +23,36 @@ namespace Frends.Kungsbacka.Pdf.Tests
             };
             var result = PdfTasks.ConvertEmbeddedImagesToPages(input, options);
             TestHelper.SaveResult("convert-embedded-images-to-pages-test-result.pdf", result.PdfDocument);
-        }
+		}
 
-        /// <summary>
-        /// Test RemoveAttachments
-        /// </summary>
-        [Test]
+		/// <summary>
+		/// Test ConvertEmbeddedImagesToPagesShouldOnlyContainDocuments
+		/// </summary>
+		[Test]
+		public void ConvertEmbeddedImagesToPagesShouldOnlyContainDocuments()
+		{
+			var input = new PdfDocumentInput
+			{
+				PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.WithAttachments)
+			};
+			var options = new ConvertEmbeddedOptions()
+			{
+				Filter = "*"
+			};
+			var result = PdfTasks.ConvertEmbeddedImagesToPages(input, options);
+			var resultPdf = TestHelper.BytesToPdf(result.PdfDocument);
+
+			var resultEmbeddedFileNames = TestHelper.GetFileSpecArray(resultPdf).Where(x => x.IsString()).Select(x => Path.GetExtension(x.ToString()));
+
+			var allowedFileTypes = new string[2] { ".pdf", ".docx" };
+
+            Assert.IsTrue(resultEmbeddedFileNames.All(x => allowedFileTypes.Contains(x)));
+		}
+
+		/// <summary>
+		/// Test RemoveAttachments
+		/// </summary>
+		[Test]
         public void RemoveAttachmentsTest()
         {
             var input = new PdfDocumentInput
