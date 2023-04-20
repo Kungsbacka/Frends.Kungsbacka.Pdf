@@ -30,13 +30,13 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="pdfDocument">Pdf document to add image to</param>
         /// <param name="imageBytes">Image data</param>
         /// <param name="caption">Optional text that gets displayed above the image</param>
-        public static void AddImageAsNewPage(PdfDocument pdfDocument, byte[] imageBytes, string caption = "")
+        public static bool AddImageAsNewPage(PdfDocument pdfDocument, byte[] imageBytes, string caption = "")
         {
             bool addText = !string.IsNullOrWhiteSpace(caption);
             imageBytes = ImageTools.RotateImage(imageBytes);
             if (imageBytes == null)
             {
-                return;
+                return false;
             }
             ImageData image = ImageDataFactory.Create(imageBytes, true);
             float imageWidth = image.GetWidth();
@@ -75,6 +75,8 @@ namespace Frends.Kungsbacka.Pdf
                 canvas.EndText();
             }
             canvas.AddImageFittedIntoRectangle(image, imageRect, true);
+
+            return true;
         }
 
         /// <summary>
