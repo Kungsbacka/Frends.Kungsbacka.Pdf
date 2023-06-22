@@ -1,5 +1,6 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using System;
 using System.IO;
 
 namespace Frends.Kungsbacka.Pdf
@@ -22,15 +23,23 @@ namespace Frends.Kungsbacka.Pdf
             {
                 return null;
             }
-            using var image = Image.Load(imageBytes, out var imageFormat);
-            // AutoOrient relies on the orientation tag in the Exif metadata.
-            // If no metadata is found, if the metadata doesn't contain any
-            // information about orientation or if the current orientation
-            // is already correct, the image will not be mutated.
-            image.Mutate(x => x.AutoOrient());
-            using var result = new MemoryStream();
-            image.Save(result, imageFormat);
-            return result.ToArray();
+
+            try
+            {
+				using var image = Image.Load(imageBytes, out var imageFormat);
+				// AutoOrient relies on the orientation tag in the Exif metadata.
+				// If no metadata is found, if the metadata doesn't contain any
+				// information about orientation or if the current orientation
+				// is already correct, the image will not be mutated.
+				image.Mutate(x => x.AutoOrient());
+				using var result = new MemoryStream();
+				image.Save(result, imageFormat);
+				return result.ToArray();
+			}
+            catch
+            {
+                return imageBytes;
+            }
         }
     }
 }
