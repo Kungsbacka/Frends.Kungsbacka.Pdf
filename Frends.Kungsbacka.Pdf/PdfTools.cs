@@ -131,14 +131,14 @@ namespace Frends.Kungsbacka.Pdf
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
                 if (fileSpec != null)
                 {
-                    PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
+                    PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
                     PdfStream stream = GetStream(refs);
                     string fileName = GetFileName(fileSpec);
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
-                    if (stream != null)
-                    {
+					if (!list.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
+					{
                         if (regex == null || regex.IsMatch(fileName))
                         {
                             list.Add(new PdfAttachment()
