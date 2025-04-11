@@ -276,7 +276,10 @@ namespace Frends.Kungsbacka.Pdf
 						if (text != recipient.Metadata)
 						{
 							if (source == null)
+							{
 								source = new List<PdfRecipient>();
+							}
+
 							if (!string.IsNullOrEmpty(recipient.Metadata))
 							{
 								source.Add(recipient);
@@ -286,8 +289,10 @@ namespace Frends.Kungsbacka.Pdf
 						AppendPageToRecipient(pdfDocument, page, recipient);
 						recipient.Metadata = text;
 					}
-					if (page == numberOfPages && source != null && !source.Contains(recipient))
-						source.Add(recipient);
+                    if (page == numberOfPages && source != null && !source.Contains(recipient))
+                    {
+                        source.Add(recipient);
+                    }
 				}
 				if (source == null)
 				{
