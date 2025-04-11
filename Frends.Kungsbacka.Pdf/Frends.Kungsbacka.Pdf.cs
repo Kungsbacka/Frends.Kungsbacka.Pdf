@@ -239,7 +239,142 @@ namespace Frends.Kungsbacka.Pdf
             };
         }
 
-        private class Pdf
+		/// <summary>
+		/// Extracts metadata from PDF:s used for Ekopost
+		/// </summary>
+		/// <param name="pdfBytes">Mandatory parameters</param>
+		/// <param name="regexPattern">Mandatory parameters</param>
+		/// <returns></returns>
+		/// <returns> IEnumerable [ PdfDocumentResult {byte[] PdfDocument} ]></returns>
+		public static IEnumerable<PdfRecipientResult> ExtractEkopostRecipientMetadataAndDocumentByRegex(byte[] pdfBytes, string regexPattern)
+		{
+			using (var memoryStream = new MemoryStream(pdfBytes))
+			{
+				List<PdfRecipient> source = null;
+
+				var recipient = new PdfRecipient();
+
+				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
+
+				var numberOfPages = pdfDocument.GetNumberOfPages();
+				for (int page = 1; page <= numberOfPages; ++page)
+				{
+					var extractionStrategy = new RegexBasedLocationExtractionStrategy(regexPattern);
+                    new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(page));
+
+					foreach (IPdfTextLocation resultantLocation in extractionStrategy.GetResultantLocations())
+					{
+						var text = resultantLocation.GetText();
+						if (text != recipient.Metadata)
+						{
+							if (source == null)
+								source = new List<PdfRecipient>();
+							if (!string.IsNullOrEmpty(recipient.Metadata))
+							{
+								source.Add(recipient);
+								recipient = new PdfRecipient();
+							}
+						}
+						AppendPageToRecipient(pdfDocument, page, recipient);
+						recipient.Metadata = text;
+					}
+					if (page == numberOfPages && source != null && !source.Contains(recipient))
+						source.Add(recipient);
+				}
+				if (source == null)
+				{
+					return null;
+				}
+
+				return source.Select(x => new PdfRecipientResult(x));
+			}
+		}
+
+		/// <summary>
+		/// Extracts textstring from PDF:s
+		/// </summary>
+		/// <param name="pdfBytes">Mandatory parameters</param>
+		/// <param name="regexPattern">Mandatory parameters</param>
+		/// <returns></returns>
+		/// <returns>string></returns>
+		public static string ExtractTextByRegex(byte[] pdfBytes, string regexPattern)
+		{
+			using (var memoryStream = new MemoryStream(pdfBytes))
+			{
+				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
+
+				var numberOfPages = pdfDocument.GetNumberOfPages();
+				var stringBuilder = new StringBuilder();
+
+				for (int index = 1; index <= numberOfPages; ++index)
+				{
+					var extractionStrategy = new RegexBasedLocationExtractionStrategy(regexPattern);
+					new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(index));
+
+					foreach (IPdfTextLocation resultantLocation in extractionStrategy.GetResultantLocations())
+					{
+						string text = resultantLocation.GetText();
+						if (!string.IsNullOrEmpty(text))
+							stringBuilder.Append(text);
+					}
+				}
+				return stringBuilder.ToString();
+			}
+		}
+
+		
+		private static byte[] MergePages(List<byte[]> documents)
+		{
+			var pdf = new Pdf(documents.FirstOrDefault());
+
+			foreach (byte[] numArray in documents.Skip(1))
+			{
+				var pdfDocument2 = new PdfDocument(new PdfReader(new RandomAccessSourceFactory().CreateSource(numArray), new ReaderProperties()));
+				PdfTools.MergePdfs(pdf.Document, pdfDocument2);
+			}
+			return pdf.ToArray();
+		}
+		private static void AppendPageToRecipient(PdfDocument pdfDocument, int page, PdfRecipient recipient)
+		{
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				var pdfDocument1 = new PdfDocument(new PdfWriter(memoryStream));
+
+				pdfDocument.CopyPagesTo(page, page, pdfDocument1, 1);
+				pdfDocument1.Close();
+				recipient.Documents.Add(memoryStream.ToArray());
+			}
+		}
+		public class PdfRecipient
+		{
+			public string Metadata { get; set; }
+
+			[JsonIgnore]
+			public List<byte[]> Documents { get; set; } = new List<byte[]>();
+		}
+
+		public class PdfRecipientResult
+		{
+			public PdfRecipientResult(PdfRecipient pdfRecipient)
+			{
+				Metadata = pdfRecipient.Metadata;
+
+				if (pdfRecipient.Documents.Count > 1)
+				{
+					Document = MergePages(pdfRecipient.Documents);
+				}
+				else
+				{
+					Document = pdfRecipient.Documents.FirstOrDefault();
+				}
+			}
+
+			public string Metadata { get; set; }
+
+			public byte[] Document { get; set; }
+		}
+
+		private class Pdf
         {
             private readonly PdfDocument _document;
             private readonly ByteArrayOutputStream _outputStream;
