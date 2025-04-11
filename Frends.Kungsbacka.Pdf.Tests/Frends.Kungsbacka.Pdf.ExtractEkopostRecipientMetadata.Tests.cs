@@ -57,7 +57,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 		}
 
 		[Test]
-		public void ExtractTextByRegex_MultipleMatches_ReturnsMultipleResults()
+		public void ExtractTextByRegex_MultipleMatch_ReturnsConcatenatedResult()
 		{
 			// Arrange
 			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.NoAttachments);
@@ -71,7 +71,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			StringAssert.Contains("testtest", result);
 		}
 		[Test]
-		public void ExtractTextByRegex_MultipleMatches_ReturnsSingleResults()
+		public void ExtractTextByRegex_SingleMatch_ReturnsMatchingResult()
 		{
 			// Arrange
 			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.NoAttachments);
@@ -82,7 +82,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
 			// Assert
 			Assert.NotNull(result);
-			StringAssert.Contains("Watermarks", result);
+			StringAssert.Contains(pattern, result);
 		}
 	}
 }
