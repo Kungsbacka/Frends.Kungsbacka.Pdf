@@ -296,7 +296,7 @@ namespace Frends.Kungsbacka.Pdf
 				}
 				if (source == null)
 				{
-					return null;
+					return Enumerable.Empty<PdfRecipientResult>();
 				}
 
 				return source.Select(x => new PdfRecipientResult(x));
