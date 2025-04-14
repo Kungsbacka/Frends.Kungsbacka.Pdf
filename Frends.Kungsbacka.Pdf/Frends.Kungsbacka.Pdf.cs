@@ -258,7 +258,7 @@ namespace Frends.Kungsbacka.Pdf
 		{
 			using (var memoryStream = new MemoryStream(pdfBytes))
 			{
-				List<PdfRecipient> source = null;
+				List<PdfRecipient> pdfRecipients = null;
 
 				var recipient = new PdfRecipient();
 
@@ -275,31 +275,31 @@ namespace Frends.Kungsbacka.Pdf
 						var text = resultantLocation.GetText();
 						if (text != recipient.Metadata)
 						{
-							if (source == null)
+							if (pdfRecipients == null)
 							{
-								source = new List<PdfRecipient>();
+								pdfRecipients = new List<PdfRecipient>();
 							}
 
 							if (!string.IsNullOrEmpty(recipient.Metadata))
 							{
-								source.Add(recipient);
+								pdfRecipients.Add(recipient);
 								recipient = new PdfRecipient();
 							}
 						}
 						AppendPageToRecipient(pdfDocument, page, recipient);
 						recipient.Metadata = text;
 					}
-                    if (page == numberOfPages && source != null && !source.Contains(recipient))
+                    if (page == numberOfPages && pdfRecipients != null && !pdfRecipients.Contains(recipient))
                     {
-                        source.Add(recipient);
+                        pdfRecipients.Add(recipient);
                     }
 				}
-				if (source == null)
+				if (pdfRecipients == null)
 				{
 					return Enumerable.Empty<PdfRecipientResult>();
 				}
 
-				return source.Select(x => new PdfRecipientResult(x));
+				return pdfRecipients.Select(x => new PdfRecipientResult(x));
 			}
 		}
 
