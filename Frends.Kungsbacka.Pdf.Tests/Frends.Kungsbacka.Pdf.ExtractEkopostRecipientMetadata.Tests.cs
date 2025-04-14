@@ -15,7 +15,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			var result = PdfTasks.ExtractEkopostRecipientMetadataAndDocumentByRegex(pdfBytes, pattern);
 
 			// Assert
-			Assert.Null(result);
+			Assert.IsEmpty(result);
 		}
 
 		[Test]
