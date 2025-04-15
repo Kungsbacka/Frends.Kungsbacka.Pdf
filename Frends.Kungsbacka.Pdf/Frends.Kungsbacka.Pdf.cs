@@ -258,43 +258,40 @@ namespace Frends.Kungsbacka.Pdf
 		{
 			using (var memoryStream = new MemoryStream(pdfBytes))
 			{
-				List<PdfRecipient> pdfRecipients = null;
-
+				var pdfRecipients = new List<PdfRecipient>();
 				var recipient = new PdfRecipient();
 
 				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
-
 				var numberOfPages = pdfDocument.GetNumberOfPages();
-				for (int page = 1; page <= numberOfPages; ++page)
+
+				for (int page = 1; page <= numberOfPages; page++)
 				{
 					var extractionStrategy = new RegexBasedLocationExtractionStrategy(regexPattern);
-                    new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(page));
+					new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(page));
 
 					foreach (IPdfTextLocation resultantLocation in extractionStrategy.GetResultantLocations())
 					{
 						var text = resultantLocation.GetText();
 						if (text != recipient.Metadata)
 						{
-							if (pdfRecipients == null)
-							{
-								pdfRecipients = new List<PdfRecipient>();
-							}
-
 							if (!string.IsNullOrEmpty(recipient.Metadata))
 							{
 								pdfRecipients.Add(recipient);
 								recipient = new PdfRecipient();
 							}
 						}
+
 						AppendPageToRecipient(pdfDocument, page, recipient);
 						recipient.Metadata = text;
 					}
-                    if (page == numberOfPages && pdfRecipients != null && !pdfRecipients.Contains(recipient))
-                    {
-                        pdfRecipients.Add(recipient);
-                    }
+
+					if (page == numberOfPages && recipient.Documents.Any() && !pdfRecipients.Contains(recipient))
+					{
+						pdfRecipients.Add(recipient);
+					}
 				}
-				if (pdfRecipients == null)
+
+				if (pdfRecipients.Count == 0)
 				{
 					return Enumerable.Empty<PdfRecipientResult>();
 				}
