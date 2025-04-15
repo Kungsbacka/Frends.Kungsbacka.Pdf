@@ -55,7 +55,32 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			StringAssert.Contains("test", list[0].Metadata);
 			StringAssert.Contains("Test", list[1].Metadata);
 		}
+		[Test]
+		public void ExtractEkopostRecipientMetadataAndDocumentByRegex_ShouldFindDocumentsAndMetadata()
+		{
+			// Arrange
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.WíthEkopostMetadata);
+			var pattern = @"\{(.*?)\}";
 
+			// Act
+			var result = PdfTasks.ExtractEkopostRecipientMetadataAndDocumentByRegex(pdfBytes, pattern);
+
+			// Assert
+			Assert.IsNotEmpty(result);
+			Assert.AreEqual(3, result.Count());
+
+			var first = result.ToList()[0];
+			Assert.AreEqual("{name:\"Test\", merge:\"11111111-1111\", subject:\"Test\"}", first.Metadata);
+			Assert.AreEqual(3, TestHelper.BytesToPdf(first.Document).GetNumberOfPages());
+
+			var second = result.ToList()[1];
+			Assert.AreEqual("{name:\"Test\", merge:\"22222222-2222\", subject:\"Test\"}", second.Metadata);
+			Assert.AreEqual(2, TestHelper.BytesToPdf(second.Document).GetNumberOfPages());
+
+			var third = result.ToList()[2];
+			Assert.AreEqual("{name:\"Test\", merge:\"33333333-3333\", subject:\"Test\"}", third.Metadata);
+			Assert.AreEqual(1, TestHelper.BytesToPdf(third.Document).GetNumberOfPages());
+		}
 		[Test]
 		public void ExtractTextByRegex_MultipleMatch_ReturnsConcatenatedResult()
 		{
