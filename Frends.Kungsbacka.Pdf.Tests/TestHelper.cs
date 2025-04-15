@@ -9,7 +9,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 {
     internal static class TestHelper
     {
-        public enum TestDocumentTypes { WithAttachments, NoAttachments };
+        public enum TestDocumentTypes { WithAttachments, NoAttachments, WíthEkopostMetadata };
 
         public static byte[] GetTestDocument(TestDocumentTypes testDocumentType)
         {
@@ -22,7 +22,10 @@ namespace Frends.Kungsbacka.Pdf.Tests
                 case TestDocumentTypes.WithAttachments:
                     fileName = "test-file-with-attachments.pdf";
                     break;
-                default:
+				case TestDocumentTypes.WíthEkopostMetadata:
+					fileName = "test-file-with-ekopost-metadata.pdf";
+					break;
+				default:
                     throw new ArgumentException(nameof(testDocumentType));
             }
             return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", fileName));

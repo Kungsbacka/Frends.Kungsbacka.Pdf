@@ -51,21 +51,12 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			};
 			// Act
 			var result = PdfTasks.MergePdfs(input);
-			var pdfDoc = CreatePdfDocument(result);
+			var pdfDoc = TestHelper.BytesToPdf(result.PdfDocument);
 
 			// Assert
 			Assert.AreEqual(2, pdfDoc.GetNumberOfPages());
 
 			TestHelper.SaveResult("MergePDFs-test-result.pdf", result.PdfDocument);
-		}
-
-		private static PdfDocument CreatePdfDocument(PdfDocumentResult result)
-		{
-			var memStream = new MemoryStream(result.PdfDocument);
-			var pdfReader = new PdfReader(memStream);
-			var pdfDoc = new PdfDocument(pdfReader);
-
-			return pdfDoc;
 		}
 
 		[Test]
@@ -109,7 +100,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			Assert.NotNull(result);
 			Assert.NotNull(result.PdfDocument);
 
-			var pdfDoc = CreatePdfDocument(result);
+			var pdfDoc = TestHelper.BytesToPdf(result.PdfDocument);
 			Assert.AreEqual(2, pdfDoc.GetNumberOfPages());
 		}
 
@@ -133,7 +124,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			Assert.NotNull(result);
 			Assert.NotNull(result.PdfDocument);
 
-			var pdfDoc = CreatePdfDocument(result);
+			var pdfDoc = TestHelper.BytesToPdf(result.PdfDocument);
 			Assert.AreEqual(5, pdfDoc.GetNumberOfPages());
 		}
 	}
