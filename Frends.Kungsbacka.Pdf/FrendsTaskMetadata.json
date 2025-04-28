@@ -22,9 +22,6 @@
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ConvertHtmlToPdf"
 		},
 		{
-			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractEkopostRecipientMetadataAndDocumentByRegex"
-		},
-		{
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractTextByRegex"
 		}
 	]
