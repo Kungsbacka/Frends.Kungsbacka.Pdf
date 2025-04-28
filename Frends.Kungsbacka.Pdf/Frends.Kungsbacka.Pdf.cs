@@ -239,7 +239,37 @@ namespace Frends.Kungsbacka.Pdf
             };
         }
 
-        private class Pdf
+		/// <summary>
+		/// Extracts textstring from PDF:s
+		/// </summary>
+		/// <param name="pdfBytes">Mandatory parameters</param>
+		/// <param name="regexPattern">Mandatory parameters</param>
+		/// <returns></returns>
+		/// <returns>string></returns>
+		public static string ExtractTextByRegex(byte[] pdfBytes, string regexPattern)
+		{
+			using (var memoryStream = new MemoryStream(pdfBytes))
+			{
+				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
+
+				var numberOfPages = pdfDocument.GetNumberOfPages();
+				var stringBuilder = new StringBuilder();
+
+				for (int index = 1; index <= numberOfPages; ++index)
+				{
+					var extractionStrategy = new RegexBasedLocationExtractionStrategy(regexPattern);
+					new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(index));
+
+					foreach (IPdfTextLocation resultantLocation in extractionStrategy.GetResultantLocations())
+					{
+						string text = resultantLocation.GetText();
+						if (!string.IsNullOrEmpty(text))
+							stringBuilder.Append(text);
+					}
+				}
+				return stringBuilder.ToString();
+			}
+		}
         {
             private readonly PdfDocument _document;
             private readonly ByteArrayOutputStream _outputStream;
