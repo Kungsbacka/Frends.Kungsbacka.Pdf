@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.IO;
 using System.Linq;
 
@@ -195,6 +196,53 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			var result = PdfTasks.ConvertHtmlToPdf(input);
 
 			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyB5PageSize-test-result.pdf", result.PdfDocument);
+		}
+		[Test]
+		public void ExtractTextByRegexShouldReturnSingleResultWhenOnlyOneMatch()
+		{
+			string expectedResult = "Test";
+
+			var regex = @"\bTest\b";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.AreEqual(result.Length, 4);
+			Assert.AreEqual(result, expectedResult);
+		}
+		[Test]
+		public void ExtractTextByRegexShouldReturnAggregatedResultWhenMultipleMatches()
+		{
+			string expectedResult = "simply dummy textsimply dummy textsimply dummy textsimply dummy text";
+             
+			var regex = @"\bsimply dummy text\b";
+
+            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.AreEqual(result, expectedResult);
+		}
+		[Test]
+		public void ExtractTextByRegexNotFoundRegexShouldReturnEmptyString()
+		{
+			var regex = @"\bTextThatShouldBeMissing\b";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.IsEmpty(result);
+		}
+		[Test]
+		public void ExtractTextByRegexInvalidRegexShouldThrowArgumentException()
+		{
+			var regex = @"\InvalidRegex\";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			Assert.Throws<ArgumentException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
 		}
 	}
 }
