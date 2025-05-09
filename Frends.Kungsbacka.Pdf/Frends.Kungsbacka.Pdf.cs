@@ -1,8 +1,16 @@
 ﻿using Frends.Kungsbacka.Pdf.HtmlToPdf;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
+using iText.Kernel.Utils;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Text;
 using PdfDocument = iText.Kernel.Pdf.PdfDocument;
 
 namespace Frends.Kungsbacka.Pdf
@@ -239,7 +247,86 @@ namespace Frends.Kungsbacka.Pdf
             };
         }
 
-        private class Pdf
+		/// <summary>
+		/// Extracts textstring from PDF:s
+		/// </summary>
+		/// <param name="pdfBytes">Mandatory parameters</param>
+		/// <param name="regexPattern">Mandatory parameters</param>
+		/// <returns></returns>
+		/// <returns>string></returns>
+		public static string ExtractTextByRegex(byte[] pdfBytes, string regexPattern)
+		{
+			using (var memoryStream = new MemoryStream(pdfBytes))
+			{
+				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
+
+				var numberOfPages = pdfDocument.GetNumberOfPages();
+				var stringBuilder = new StringBuilder();
+
+				for (int index = 1; index <= numberOfPages; ++index)
+				{
+					var extractionStrategy = new RegexBasedLocationExtractionStrategy(regexPattern);
+					new PdfCanvasProcessor(extractionStrategy).ProcessPageContent(pdfDocument.GetPage(index));
+
+					foreach (IPdfTextLocation resultantLocation in extractionStrategy.GetResultantLocations())
+					{
+						string text = resultantLocation.GetText();
+						if (!string.IsNullOrEmpty(text))
+							stringBuilder.Append(text);
+					}
+				}
+				return stringBuilder.ToString();
+			}
+		}
+
+		
+		/// <summary>
+		/// Merges several PDF:s together
+		/// </summary>
+		/// <param name="input">Mandatory parameters</param>
+		/// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
+		public static PdfDocumentResult MergePdfs([PropertyTab] List<PdfDocumentInput> input)
+		{
+			if (input is null)
+			{
+				throw new ArgumentNullException(nameof(input));
+			}
+
+			if (input.Any(x => x is null))
+			{
+				throw new ArgumentNullException(nameof(input));
+			}
+
+			byte[] result = null;
+
+			using (var outputStream = new MemoryStream())
+			{
+				using (var pdfWriter = new PdfWriter(outputStream))
+				using (var mergedPdf = new PdfDocument(pdfWriter))
+				{
+					var pdfMerger = new PdfMerger(mergedPdf);
+
+					foreach (var pdfBytes in input)
+					{
+						using var tempStream = new MemoryStream(pdfBytes.PdfDocument);
+						using var reader = new PdfReader(tempStream);
+						using var sourcePdf = new PdfDocument(reader);
+
+						pdfMerger.Merge(sourcePdf, 1, sourcePdf.GetNumberOfPages());
+					}
+				}
+
+				result = outputStream.ToArray();
+			}
+
+			var output = new PdfDocumentResult
+			{
+				PdfDocument = result
+			};
+
+			return output;
+		}
+		private class Pdf
         {
             private readonly PdfDocument _document;
             private readonly ByteArrayOutputStream _outputStream;

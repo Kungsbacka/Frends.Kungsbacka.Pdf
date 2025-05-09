@@ -1,4 +1,9 @@
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -195,6 +200,100 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			var result = PdfTasks.ConvertHtmlToPdf(input);
 
 			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyB5PageSize-test-result.pdf", result.PdfDocument);
+		}
+		[Test]
+		public void ExtractTextByRegexShouldReturnSingleResultWhenOnlyOneMatch()
+		{
+			string expectedResult = "Test";
+
+			var regex = @"\bTest\b";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.AreEqual(result.Length, 4);
+			Assert.AreEqual(result, expectedResult);
+		}
+		[Test]
+		public void ExtractTextByRegexShouldReturnAggregatedResultWhenMultipleMatches()
+		{
+			string expectedResult = "simply dummy textsimply dummy textsimply dummy textsimply dummy text";
+             
+			var regex = @"\bsimply dummy text\b";
+
+            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.AreEqual(result, expectedResult);
+		}
+		[Test]
+		public void ExtractTextByRegexNotFoundRegexShouldReturnEmptyString()
+		{
+			var regex = @"\bTextThatShouldBeMissing\b";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+
+			Assert.IsEmpty(result);
+		}
+		[Test]
+		public void ExtractTextByRegexInvalidRegexShouldThrowArgumentException()
+		{
+			var regex = @"\InvalidRegex\";
+
+			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+
+			Assert.Throws<ArgumentException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
+		}
+
+		[Test]
+		public void MergePDFs_MultiplePdfDocumentInputShouldBeMergedIntoOnePdfDocumentWithTwoPages()
+		{
+			// Arrange
+			var input = new List<PdfDocumentInput>()
+			{
+				{
+					new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.NoAttachments) }
+				},
+				{
+					new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.NoAttachments) }
+				}
+			};
+			// Act
+			var result = PdfTasks.MergePdfs(input);
+			var pdfDoc = TestHelper.BytesToPdf(result.PdfDocument);
+
+			// Assert
+			Assert.AreEqual(2, pdfDoc.GetNumberOfPages());
+
+			TestHelper.SaveResult("MergePDFs-test-result.pdf", result.PdfDocument);
+		}
+
+		[Test]
+		public void MergePdfs_NullInput_ThrowsArgumentNullException()
+		{
+			// Arrange
+			List<PdfDocumentInput> input = null;
+
+			// Act & Assert
+			Assert.Throws<ArgumentNullException>(() => PdfTasks.MergePdfs(input));
+		}
+
+		[Test]
+		public void MergePdfs_InputWithNullItem_ThrowsArgumentNullException()
+		{
+			// Arrange
+			var input = new List<PdfDocumentInput>
+			{
+				new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.NoAttachments) },
+				null // This item is null
+			};
+
+			// Act & Assert
+			Assert.Throws<ArgumentNullException>(() => PdfTasks.MergePdfs(input));
 		}
 	}
 }
