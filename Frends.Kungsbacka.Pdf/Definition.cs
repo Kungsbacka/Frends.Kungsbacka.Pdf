@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 
 namespace Frends.Kungsbacka.Pdf
 {
@@ -30,6 +32,46 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public bool ExtractOepPrefix { get; set; }
+    }
+    public class WkHtmlMarginOptions
+    {
+        /// <summary>
+		/// Set margin-top. Default is 10.
+		/// </summary>
+		[DefaultValue(10)]
+        public int MarginTop { get; set; } = 10;
+        /// <summary>
+		/// Set margin-bottom. Default is 10.
+		/// </summary>
+		[DefaultValue(10)]
+        public int MarginBottom { get; set; } = 10;
+        /// <summary>
+		/// Set margin-left. Default is 10.
+		/// </summary>
+		[DefaultValue(10)]
+        public int MarginLeft { get; set; } = 10;
+        /// <summary>
+		/// Set margin-right. Default is 10.
+		/// </summary>
+		[DefaultValue(10)]
+        public int MarginRight { get; set; } = 10;
+    }
+    public class WkHtmlFooterOptions
+    {
+        /// <summary>
+		/// Set footer-spacing. Default is 0.
+		/// </summary>
+		[DefaultValue(0)]
+        public int FooterSpacing { get; set; } = 0;
+        /// <summary>
+		/// Include line above footer. Default is false
+		/// </summary>
+        [DefaultValue(false)]
+        public bool IncludeFooterLine { get; set; } = false;
+        /// <summary>
+		/// URL to footer-file
+		/// </summary>
+        public string FooterHtmlPath { get; set; }
     }
 
     /// <summary>
@@ -182,6 +224,11 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string PageSize { get; set; }
+        /// <summary>
+        /// Disable the intelligent shrinking strategy used by WebKit that makes the pixel/dpi ratio non-constant. Default is true
+        /// </summary>
+        [DefaultValue(true)]
+        public bool DisableSmartShrinking { get; set; } = true;
 
         /// <summary>
         /// Path to wkhtmltopdf executable.
@@ -189,5 +236,6 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string ExecutablePath { get; set; }
+        
     }
 }

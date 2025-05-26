@@ -226,7 +226,9 @@ namespace Frends.Kungsbacka.Pdf
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
-        public static PdfDocumentResult ConvertHtmlToPdf([PropertyTab] ConvertHtmlToPdfInput input)
+        public static PdfDocumentResult ConvertHtmlToPdf([PropertyTab] ConvertHtmlToPdfInput input,
+                                                         [PropertyTab] WkHtmlMarginOptions marginOptions,
+                                                         [PropertyTab] WkHtmlFooterOptions footerOptions)
         {
             if (input is null)
             {
@@ -237,7 +239,7 @@ namespace Frends.Kungsbacka.Pdf
                 throw new ArgumentNullException(nameof(input.Html));
             }
 
-            var converter = new HtmlToPdfConverter(input);
+            var converter = new HtmlToPdfConverter(input, marginOptions, footerOptions);
 
             var pdf = converter.RenderHtmlAsPdf(input.Html);
 

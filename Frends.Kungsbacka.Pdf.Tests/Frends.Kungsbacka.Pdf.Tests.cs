@@ -166,10 +166,12 @@ namespace Frends.Kungsbacka.Pdf.Tests
 		{
 			var input = new ConvertHtmlToPdfInput
 			{
-				Html = TestHelper.ConvertHtmlToPdfHtml()
+				Html = TestHelper.ConvertHtmlToPdfHtml(),
 			};
+            var marginOptions = new WkHtmlMarginOptions();
+			var footerOptions = new WkHtmlFooterOptions();
 
-			var result = PdfTasks.ConvertHtmlToPdf(input);
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
 			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnly-test-result.pdf", result.PdfDocument);
 		}
@@ -182,8 +184,10 @@ namespace Frends.Kungsbacka.Pdf.Tests
 				Html = TestHelper.ConvertHtmlToPdfHtml(),
 				Orientation = "Landscape"
 			};
+            var marginOptions = new WkHtmlMarginOptions();
+            var footerOptions = new WkHtmlFooterOptions();
 
-			var result = PdfTasks.ConvertHtmlToPdf(input);
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
 			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyLandscape-test-result.pdf", result.PdfDocument);
 		}
@@ -196,12 +200,50 @@ namespace Frends.Kungsbacka.Pdf.Tests
 				Html = TestHelper.ConvertHtmlToPdfHtml(),
 				PageSize = "B5"
 			};
+            var marginOptions = new WkHtmlMarginOptions();
+            var footerOptions = new WkHtmlFooterOptions();
 
-			var result = PdfTasks.ConvertHtmlToPdf(input);
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
 			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyB5PageSize-test-result.pdf", result.PdfDocument);
 		}
-		[Test]
+        [Test]
+        public void ConvertHtmlToPdfHtmlMarginTop()
+        {
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                Orientation = "Landscape"
+            };
+            var marginOptions = new WkHtmlMarginOptions
+            {
+                MarginTop = 100
+            };
+            var footerOptions = new WkHtmlFooterOptions();
+
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
+
+            TestHelper.SaveResult("ConvertHtmlToPdfHtmlMarginTop-test-result.pdf", result.PdfDocument);
+        }
+        [Test]
+        public void ConvertHtmlToPdfHtmlIncludeFooterLine()
+        {
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                Orientation = "Landscape"
+            };
+            var marginOptions = new WkHtmlMarginOptions();
+            var footerOptions = new WkHtmlFooterOptions
+            {
+                IncludeFooterLine = true
+            };
+
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
+
+            TestHelper.SaveResult("ConvertHtmlToPdfHtmlIncludeFooterLine-test-result.pdf", result.PdfDocument);
+        }
+        [Test]
 		public void ExtractTextByRegexShouldReturnSingleResultWhenOnlyOneMatch()
 		{
 			string expectedResult = "Test";

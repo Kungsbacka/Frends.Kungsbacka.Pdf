@@ -10,7 +10,7 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
     {
         private const string DefaultExecutablePath = @"C:\Program Files\wkhtmltox\bin\wkhtmltopdf.exe";
 
-        public HtmlToPdfConverter(ConvertHtmlToPdfInput input)
+        public HtmlToPdfConverter(ConvertHtmlToPdfInput input, WkHtmlMarginOptions marginOptions, WkHtmlFooterOptions footerOptions)
         {
             if (!string.IsNullOrEmpty(input.Orientation))
             {
@@ -23,6 +23,17 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
             }
 
             ExecutablePath = string.IsNullOrEmpty(input.ExecutablePath) ? DefaultExecutablePath : input.ExecutablePath;
+            Title = input.Title;
+            DisableSmartShrinking = input.DisableSmartShrinking;
+
+            MarginTop = marginOptions.MarginTop;
+            MarginBottom = marginOptions.MarginBottom;
+            MarginLeft = marginOptions.MarginLeft;
+            MarginRight = marginOptions.MarginRight;
+
+            FooterSpacing = footerOptions.FooterSpacing;
+            FooterHtmlPath = footerOptions.FooterHtmlPath;
+            IncludeFooterLine = footerOptions.IncludeFooterLine;
         }
         public byte[] RenderHtmlAsPdf(string html)
         {
@@ -44,7 +55,22 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
 
             switches += $"--image-dpi {ImageDPI} ";
             switches += $"--image-quality {ImageQuality} ";
-            switches += "--disable-smart-shrinking ";
+            if (DisableSmartShrinking)
+                switches += "--disable-smart-shrinking ";
+
+            //Margins
+            switches += $"--margin-bottom {MarginBottom} ";
+            switches += $"--margin-left {MarginLeft} ";
+            switches += $"--margin-top {MarginTop} ";
+            switches += $"--margin-right {MarginRight} ";
+
+            //Footer settings
+            switches += $"--footer-spacing {FooterSpacing} ";
+            if (!string.IsNullOrEmpty(FooterHtmlPath))
+                switches += $"--footer-html {FooterHtmlPath} ";
+            if (IncludeFooterLine)
+                switches += "--footer-line ";
+
 
             return switches;
         }
@@ -131,9 +157,17 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
         public string ExecutablePath { get; set; }
         public PdfPageSize PageSize { get; set; } = PdfPageSize.A4;
         public PdfOrientation Orientation { get; set; } = PdfOrientation.Portrait;
+        public bool DisableSmartShrinking { get; set; } = true;
         public string Title { get; set; }
         public int ImageDPI { get; set; } = 600;
         public int ImageQuality { get; set; } = 94;
+        public int MarginTop { get; set; } = 10;
+        public int MarginBottom { get; set; } = 10;
+        public int MarginLeft { get; set; } = 10;
+        public int MarginRight { get; set; } = 10;
+        public int FooterSpacing { get; set; } = 0;
+        public bool IncludeFooterLine { get; set; } = false;
+        public string FooterHtmlPath { get; set; }
     }
 
     public enum PdfOrientation
