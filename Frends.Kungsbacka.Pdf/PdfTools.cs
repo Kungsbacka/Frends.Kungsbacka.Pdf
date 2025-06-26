@@ -110,7 +110,7 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="pdfDocument">Pdf document to extract from</param>
         /// <param name="pattern">Optional filter for file names</param>
         /// <param name="extractOepPrefix">Optional boolean for extracting oep prefixes from the description</param>
-        /// <param name="makeFilenameSafe">Optional boolean for removing system disallowed file name characters</param>
+        /// <param name="makeFilenameSafe">Optional boolean for replacing system disallowed file name characters with '_'</param>
         public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false, bool makeFilenameSafe = true)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
