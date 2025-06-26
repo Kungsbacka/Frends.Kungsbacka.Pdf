@@ -9,8 +9,10 @@ using iText.Kernel.Utils;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using iText.StyledXmlParser.Jsoup.Safety;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -108,32 +110,46 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="pdfDocument">Pdf document to extract from</param>
         /// <param name="pattern">Optional filter for file names</param>
         /// <param name="extractOepPrefix">Optional boolean for extracting oep prefixes from the description</param>
-        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false)
+        /// <param name="makeFilenameSafe">Optional boolean for removing system disallowed file name characters</param>
+        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false, bool makeFilenameSafe = true)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
+
             if (fileSpecArray == null)
             {
                 return Enumerable.Empty<PdfAttachment>();
             }
+
             Regex regex = null;
+
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 regex = GetRegexFromPattern(pattern);
             }
+
             var list = new List<PdfAttachment>();
             int size = fileSpecArray.Size();
             if (size % 2 != 0)
             {
                 return list.AsEnumerable();
             }
+
+            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
+
             for (int i = 0; i < size; i += 2)
             {
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
+
                 if (fileSpec != null)
                 {
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
                     PdfStream stream = GetStream(refs);
                     string fileName = GetFileName(fileSpec);
+
+                    if (makeFilenameSafe)
+                    {
+                        fileName = new string(fileName.Select(ch => invalidFileChars.Any(invCh => invCh == ch) ? '_' : ch).ToArray());
+                    }
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
@@ -144,7 +160,7 @@ namespace Frends.Kungsbacka.Pdf
                             list.Add(new PdfAttachment()
                             {
                                 Name = fileName,
-                                Extension = System.IO.Path.GetExtension(fileName),
+                                Extension = System.IO.Path.GetExtension(fileName), //Seems to actually allow many chars but exception on some though (ex. '|')
                                 Data = stream.GetBytes(),
                                 OepPrefix = oepPrefix
                             });
@@ -152,6 +168,7 @@ namespace Frends.Kungsbacka.Pdf
                     }
                 }
             }
+
             return list.AsEnumerable();
         }
 
