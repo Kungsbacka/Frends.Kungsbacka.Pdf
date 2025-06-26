@@ -96,7 +96,6 @@ namespace Frends.Kungsbacka.Pdf.Tests
             string UnsafeFilename = "my:unsafe/file*name?|.txt";
             string SafeFilename = "my_unsafe_file_name__.txt";
 
-            // Arrange: generate PDF with unsafe attachment using TestHelper
             byte[] pdfWithUnsafe = TestHelper.CreatePdfWithAttachment(UnsafeFilename);
             var input = new PdfDocumentInput { PdfDocument = pdfWithUnsafe };
             var options = new ExtractAttachmentsOptions
@@ -123,7 +122,6 @@ namespace Frends.Kungsbacka.Pdf.Tests
         {
             string UnsafeFilename = "my safe file name.txt";
 
-            // Arrange: generate PDF with unsafe attachment using TestHelper
             byte[] pdfWithUnsafe = TestHelper.CreatePdfWithAttachment(UnsafeFilename);
             var input = new PdfDocumentInput { PdfDocument = pdfWithUnsafe };
             var options = new ExtractAttachmentsOptions
