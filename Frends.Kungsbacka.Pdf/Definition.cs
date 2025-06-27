@@ -38,8 +38,20 @@ namespace Frends.Kungsbacka.Pdf
     /// <summary>
     /// Optional parameters for task ExtractAttachments
     /// </summary>
-    public class ExtractAttachmentsOptions : PdfCommonOptions
+    public class ExtractAttachmentsOptions
     {
+        /// <summary>
+        /// Filter attachments. Multiple filters are supported separated by comma (ex.: *.jpg, *.png).
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string Filter { get; set; }
+
+        /// <summary>
+        /// Extract prefix from PDF description
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public bool ExtractOepPrefix { get; set; }
+
         /// <summary>
         /// Replace system disallowed characters with '_' in resulting file name.
         /// </summary>
