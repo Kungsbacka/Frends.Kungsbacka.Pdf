@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Filespec;
 using NUnit.Framework;
 
 namespace Frends.Kungsbacka.Pdf.Tests
@@ -22,7 +23,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
                 case TestDocumentTypes.WithAttachments:
                     fileName = "test-file-with-attachments.pdf";
                     break;
-				case TestDocumentTypes.ExtractText:
+                case TestDocumentTypes.ExtractText:
 					fileName = "Loremipsum.pdf";
 					break;
 				default:
@@ -30,6 +31,31 @@ namespace Frends.Kungsbacka.Pdf.Tests
             }
             return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", fileName));
 
+        }
+
+        /// <summary>
+        /// Creates an in-memory PDF with a single file attachment named fileName.
+        /// </summary>
+        public static byte[] CreatePdfWithAttachment(string fileName)
+        {
+            using (var ms = new MemoryStream())
+            using (var writer = new PdfWriter(ms))
+            using (var pdfDoc = new PdfDocument(writer))
+            {
+                var fileBytes = new byte[] { 1, 2, 3 };
+                PdfFileSpec fs = PdfFileSpec.CreateEmbeddedFileSpec(
+                    pdfDoc,
+                    fileBytes,
+                    fileName,               // file specification name
+                    fileName,               // display file name
+                    null,                   // MIME type (none)
+                    new PdfDictionary(),    // params (empty)
+                    PdfName.Data            // AFRelationship
+                );
+                pdfDoc.AddFileAttachment(fileName, fs);
+                pdfDoc.Close();
+                return ms.ToArray();
+            }
         }
 
         public static void SaveResult(string fileName, byte[] pdfDocument)

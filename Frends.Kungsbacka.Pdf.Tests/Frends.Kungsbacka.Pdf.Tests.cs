@@ -82,12 +82,67 @@ namespace Frends.Kungsbacka.Pdf.Tests
             {
                 PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.WithAttachments)
             };
-            var options = new PdfCommonOptions()
+            var options = new ExtractAttachmentsOptions()
             {
                 Filter = "*"
             };
             var result = PdfTasks.ExtractAttachments(input, options);
             Assert.AreEqual(6, result.Attachments.Count());
+        }
+
+        [Test]
+        public void ExtractAttachments_MakeFilenameSafe_True_ReplacesUnsafeChars()
+        {
+            //Arrange
+            string UnsafeFilename = "my:unsafe/file*name?|.txt";
+            string SafeFilename = "my_unsafe_file_name__.txt";
+
+            byte[] pdfWithUnsafe = TestHelper.CreatePdfWithAttachment(UnsafeFilename);
+            var input = new PdfDocumentInput { PdfDocument = pdfWithUnsafe };
+            var options = new ExtractAttachmentsOptions
+            {
+                MakeFilenameSafe = true,
+                ExtractOepPrefix = false,
+                Filter = "*"
+            };
+
+            // Act
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Attachments);
+            Assert.IsNotEmpty(result.Attachments);
+            var attachment = result.Attachments.FirstOrDefault();
+            Assert.NotNull(attachment);
+            Assert.AreEqual(SafeFilename, attachment.Name);
+        }
+
+        [Test]
+        public void ExtractAttachments_MakeFilenameSafe_False_And_Filename_Is_actually_Safe_KeepsOriginalName()
+        {
+            //Arrange
+            string UnsafeFilename = "my safe file name.txt";
+
+            byte[] pdfWithUnsafe = TestHelper.CreatePdfWithAttachment(UnsafeFilename);
+            var input = new PdfDocumentInput { PdfDocument = pdfWithUnsafe };
+            var options = new ExtractAttachmentsOptions
+            {
+                MakeFilenameSafe = false,
+                ExtractOepPrefix = false,
+                Filter = "*"
+            };
+
+            // Act
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Attachments);
+            Assert.IsNotEmpty(result.Attachments);
+            var attachment = result.Attachments.FirstOrDefault();
+            Assert.NotNull(attachment);
+            Assert.AreEqual(UnsafeFilename, attachment.Name);
         }
 
         /// <summary>

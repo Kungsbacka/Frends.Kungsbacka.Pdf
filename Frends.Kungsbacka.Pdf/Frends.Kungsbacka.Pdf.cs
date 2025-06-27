@@ -146,7 +146,7 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="input">Mandatory parameters</param>
         /// <param name="options">Optional parameters</param>
         /// <returns>AttachmentResult {IEnumerable&lt;PdfAttachment&gt; Attachments}</returns>
-        public static ExtractAttachmentsResult ExtractAttachments([PropertyTab] PdfDocumentInput input, [PropertyTab] PdfCommonOptions options)
+        public static ExtractAttachmentsResult ExtractAttachments([PropertyTab] PdfDocumentInput input, [PropertyTab] ExtractAttachmentsOptions options)
         {
             if (input is null)
             {
@@ -156,11 +156,12 @@ namespace Frends.Kungsbacka.Pdf
             {
                 throw new ArgumentNullException(nameof(input.PdfDocument));
             }
+
             string pattern = options?.Filter ?? "*";
             var pdf = new Pdf(input.PdfDocument);
             var output = new ExtractAttachmentsResult
             {
-                Attachments = PdfTools.ExtractAttachments(pdf.Document, pattern, options.ExtractOepPrefix)
+                Attachments = PdfTools.ExtractAttachments(pdf.Document, pattern, options.ExtractOepPrefix, options.MakeFilenameSafe)
             };
             return output;
         }

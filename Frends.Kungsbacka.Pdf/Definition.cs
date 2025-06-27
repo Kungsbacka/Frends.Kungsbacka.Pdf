@@ -27,12 +27,26 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public string Filter { get; set; }
+
         /// <summary>
         /// Extract prefix from PDF description
         /// </summary>
         [DisplayFormat(DataFormatString = "Text")]
         public bool ExtractOepPrefix { get; set; }
     }
+
+    /// <summary>
+    /// Optional parameters for task ExtractAttachments
+    /// </summary>
+    public class ExtractAttachmentsOptions : PdfCommonOptions
+    {
+        /// <summary>
+        /// Replace system disallowed characters with '_' in resulting file name.
+        /// </summary>
+        [DefaultValueAttribute(true)]
+        public bool MakeFilenameSafe { get; set; } = true;
+    }
+
     public class WkHtmlMarginOptions
     {
         /// <summary>
@@ -56,6 +70,7 @@ namespace Frends.Kungsbacka.Pdf
 		[DefaultValue(10)]
         public int MarginRight { get; set; } = 10;
     }
+
     public class WkHtmlFooterOptions
     {
         /// <summary>
@@ -63,11 +78,13 @@ namespace Frends.Kungsbacka.Pdf
 		/// </summary>
 		[DefaultValue(0)]
         public int FooterSpacing { get; set; } = 0;
+
         /// <summary>
 		/// Include line above footer. Default is false
 		/// </summary>
         [DefaultValue(false)]
         public bool IncludeFooterLine { get; set; } = false;
+
         /// <summary>
 		/// URL to footer-file
 		/// </summary>

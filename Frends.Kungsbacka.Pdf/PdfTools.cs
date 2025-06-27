@@ -34,10 +34,12 @@ namespace Frends.Kungsbacka.Pdf
         {
             bool addText = !string.IsNullOrWhiteSpace(caption);
             imageBytes = ImageTools.RotateImage(imageBytes);
+
             if (imageBytes == null)
             {
                 return false;
             }
+
             ImageData image = ImageDataFactory.Create(imageBytes, true);
             float imageWidth = image.GetWidth();
             float imageHeight = image.GetHeight();
@@ -48,24 +50,29 @@ namespace Frends.Kungsbacka.Pdf
             float pageWidth = page.GetPageSizeWithRotation().GetWidth();
             float pageHeight = page.GetPageSizeWithRotation().GetHeight();
             float textBoxHeight = 0f;
+
             if (addText)
             {
                 textBoxHeight = 20f;
             }
+
             float maxImageWidth = pageWidth - margin * 2;
             float maxImageHeight = pageHeight - textBoxHeight - margin * 2;
             float ratio = Math.Min(maxImageWidth / imageWidth, maxImageHeight / imageHeight);
+
             if (ratio < 1f)
             {
                 imageWidth *= ratio;
                 imageHeight *= ratio;
             }
+
             Rectangle imageRect = new Rectangle(
                 (pageWidth - imageWidth) / 2,
                 (pageHeight - imageHeight) / 2 - textBoxHeight / 2,
                 imageWidth,
                 imageHeight
             );
+
             if (addText)
             {
                 canvas.BeginText();
@@ -74,10 +81,12 @@ namespace Frends.Kungsbacka.Pdf
                 canvas.ShowText(caption);
                 canvas.EndText();
             }
+
             canvas.AddImageFittedIntoRectangle(image, imageRect, true);
 
             return true;
         }
+
 
         /// <summary>
         /// Merges two Pdf documents into one. Document #2 is placed after
@@ -92,9 +101,12 @@ namespace Frends.Kungsbacka.Pdf
             pdfDocument1.GetReader().SetUnethicalReading(true);
             pdfDocument2.GetReader().SetUnethicalReading(true);
             PdfMerger merger = new PdfMerger(pdfDocument1);
+
             merger.Merge(pdfDocument2, 1, pdfDocument2.GetNumberOfPages());
+
             return pdfDocument1;
         }
+
 
         /// <summary>
         /// Extracts embedded files (EF) as attachments from the supplied Pdf.
@@ -108,43 +120,50 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="pdfDocument">Pdf document to extract from</param>
         /// <param name="pattern">Optional filter for file names</param>
         /// <param name="extractOepPrefix">Optional boolean for extracting oep prefixes from the description</param>
-        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false)
+        /// <param name="makeFilenameSafe">Optional boolean for replacing system disallowed file name characters with '_'</param>
+        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false, bool makeFilenameSafe = true)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
+
             if (fileSpecArray == null)
             {
                 return Enumerable.Empty<PdfAttachment>();
             }
+
             Regex regex = null;
+
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 regex = GetRegexFromPattern(pattern);
             }
-            var list = new List<PdfAttachment>();
+
+            var attachments = new List<PdfAttachment>();
             int size = fileSpecArray.Size();
             if (size % 2 != 0)
             {
-                return list.AsEnumerable();
+                return attachments.AsEnumerable();
             }
+
             for (int i = 0; i < size; i += 2)
             {
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
+
                 if (fileSpec != null)
                 {
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
                     PdfStream stream = GetStream(refs);
-                    string fileName = GetFileName(fileSpec);
+                    string fileName = GetFileName(fileSpec, makeFilenameSafe);
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
-					if (!list.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
+					if (!attachments.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
 					{
                         if (regex == null || regex.IsMatch(fileName))
                         {
-                            list.Add(new PdfAttachment()
+                            attachments.Add(new PdfAttachment()
                             {
                                 Name = fileName,
-                                Extension = System.IO.Path.GetExtension(fileName),
+                                Extension = System.IO.Path.GetExtension(fileName), //Seems to actually allow many chars but exception on some though (ex. '|')
                                 Data = stream.GetBytes(),
                                 OepPrefix = oepPrefix
                             });
@@ -152,8 +171,10 @@ namespace Frends.Kungsbacka.Pdf
                     }
                 }
             }
-            return list.AsEnumerable();
+
+            return attachments.AsEnumerable();
         }
+
 
         private static string GetOepFilePrefix(PdfDictionary dict, string fileName)
         {
@@ -175,6 +196,7 @@ namespace Frends.Kungsbacka.Pdf
             return string.Empty;
         }
 
+
         /// <summary>
         /// Similar to ExtractAttachments, but only returns a list
         /// with attachment names.
@@ -188,31 +210,37 @@ namespace Frends.Kungsbacka.Pdf
             {
                 return Enumerable.Empty<string>();
             }
+
             Regex regex = null;
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 regex = GetRegexFromPattern(pattern);
             }
-            var list = new List<string>();
-            int size = fileSpecArray.Size();
-            if (size % 2 != 0)
+
+            var fileNames = new List<string>();
+            int fileArrSize = fileSpecArray.Size();
+            if (fileArrSize % 2 != 0)
             {
-                return list.AsEnumerable();
+                return fileNames.AsEnumerable();
             }
-            for (int i = 0; i < size; i += 2)
+
+            for (int i = 0; i < fileArrSize; i += 2)
             {
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
                 string fileName = GetFileName(fileSpec);
+
                 if (fileName != null)
                 {
                     if (regex == null || regex.IsMatch(fileName))
                     {
-                        list.Add(fileName);
+                        fileNames.Add(fileName);
                     }
                 }
             }
-            return list.AsEnumerable();
+
+            return fileNames.AsEnumerable();
         }
+
 
         /// <summary>
         /// Removes both embedded and associated files with the supplied name.
@@ -227,14 +255,17 @@ namespace Frends.Kungsbacka.Pdf
         public static void RemoveAttachment(PdfDocument pdfDocument, string name)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
+
             if (fileSpecArray != null)
             {
                 var list = new List<int>();
                 int size = fileSpecArray.Size();
+
                 if (size % 2 != 0)
                 {
                     return;
                 }
+
                 for (int i = 0; i < size; i += 2)
                 {
                     PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
@@ -248,6 +279,7 @@ namespace Frends.Kungsbacka.Pdf
                         }
                     }
                 }
+
                 // Sort descending so we don't change indexes when removing.
                 list.Sort((a, b) => b.CompareTo(a));
                 foreach (int index in list)
@@ -255,29 +287,36 @@ namespace Frends.Kungsbacka.Pdf
                     fileSpecArray.Remove(index);
                 }
             }
+
             PdfDictionary root = pdfDocument.GetCatalog().GetPdfObject();
             PdfArray attachmentArray = root.GetAsArray(PdfName.AF);
+
             if (attachmentArray != null)
             {
                 var list = new List<PdfObject>();
+
                 for (int i = 0; i < attachmentArray.Size(); i++)
                 {
                     PdfDictionary fileSpec = attachmentArray.GetAsDictionary(i);
+
                     if (fileSpec != null)
                     {
                         string fileName = GetFileName(fileSpec);
+
                         if (fileName.Equals(name, StringComparison.OrdinalIgnoreCase))
                         {
                             list.Add(attachmentArray.Get(i));
                         }
                     }
                 }
+
                 foreach (PdfObject fileSpec in list)
                 {
                     attachmentArray.Remove(fileSpec);
                 }
             }
         }
+
 
         /// <summary>
         /// Adds a footer text to all pages. Multiple lines are delimited by newline (\n)
@@ -292,14 +331,17 @@ namespace Frends.Kungsbacka.Pdf
                     .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA))
                     .SetFontSize(10)
                     .SetFontColor(ColorConstants.BLACK);
+
             for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
             {
                 Rectangle pageSize = pdfDocument.GetPage(i).GetPageSize();
                 float x = pageSize.GetWidth() / 2;
                 float y = pageSize.GetBottom() + 15 + (5 * numLines);
+
                 doc.ShowTextAligned(footer, x, y, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
             }
         }
+
 
         private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
@@ -309,10 +351,12 @@ namespace Frends.Kungsbacka.Pdf
                 ?.GetAsDictionary(PdfName.Names)
                 ?.GetAsDictionary(PdfName.EmbeddedFiles)
                 ?.GetAsArray(PdfName.Names);
+
             if (array != null)
             {
                 return array;
             }
+
             // When there are lots of embedded files, they get split up
             // into multiple dictionaries (kids).
             array = pdfDocument
@@ -320,10 +364,12 @@ namespace Frends.Kungsbacka.Pdf
                 ?.GetPdfObject()
                 ?.GetAsDictionary(PdfName.Names)
                 ?.GetAsDictionary(PdfName.EmbeddedFiles)
-                ?.GetAsArray(PdfName.Kids);            
+                ?.GetAsArray(PdfName.Kids); 
+            
             if (array != null)
             {
                 var combined = new PdfArray();
+
                 foreach (PdfDictionary dict in array)
                 {
                     combined.AddAll(dict.GetAsArray(PdfName.Names));
@@ -334,18 +380,42 @@ namespace Frends.Kungsbacka.Pdf
             return null;
         }
 
-        private static string GetFileName(PdfDictionary dict)
+
+        /// <summary>
+        /// Retrieves the file name from a given PdfDictionary representing a file specification.
+        /// If the dictionary contains the 'UF' (Unicode File) key, its value is returned as the file name.
+        /// Otherwise, the value of the 'F' (File) key is used. Optionally, the file name can be sanitized
+        /// by replacing invalid file name characters with underscores.
+        /// </summary>
+        /// <param name="dict">PdfDictionary representing a file specification to get the names from</param>
+        /// <param name="sanitizeFileName">Optionally replace invalid chars with '_'</param>
+        private static string GetFileName(PdfDictionary dict, bool sanitizeFileName = false)
         {
             if (dict == null)
             {
                 return null;
             }
+
+            string fileName = string.Empty;
+
             if (dict.ContainsKey(PdfName.UF))
             {
-                return dict.GetAsString(PdfName.UF).ToString();
+                fileName = dict.GetAsString(PdfName.UF).ToString();
             }
-            return dict.GetAsString(PdfName.F).ToString();
+            else
+            {
+                fileName = dict.GetAsString(PdfName.F).ToString();
+            }
+
+            if (sanitizeFileName)
+            {
+                char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
+                fileName = new string(fileName.Select(ch => invalidFileChars.Any(invCh => invCh == ch) ? '_' : ch).ToArray());
+            }
+
+            return fileName;
         }
+
 
         private static PdfStream GetStream(PdfDictionary dict)
         {
@@ -353,12 +423,15 @@ namespace Frends.Kungsbacka.Pdf
             {
                 return null;
             }
+
             if (dict.ContainsKey(PdfName.UF))
             {
                 return dict.GetAsStream(PdfName.UF);
             }
+
             return dict.GetAsStream(PdfName.F);
         }
+
 
         private static Regex GetRegexFromPattern(string pattern)
         {
@@ -368,6 +441,7 @@ namespace Frends.Kungsbacka.Pdf
                     .Select(s => "(" + Regex.Escape(s.Trim()).Replace(@"\*", ".*").Replace(@"\?", ".") + ")")
                     .ToArray()
             );
+
             return new Regex(
                 "^" + regexPattern + "$",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline
