@@ -132,8 +132,6 @@ namespace Frends.Kungsbacka.Pdf
                 return list.AsEnumerable();
             }
 
-            char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
-
             for (int i = 0; i < size; i += 2)
             {
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
@@ -143,11 +141,6 @@ namespace Frends.Kungsbacka.Pdf
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
                     PdfStream stream = GetStream(refs);
                     string fileName = GetFileName(fileSpec);
-
-                    if (makeFilenameSafe)
-                    {
-                        fileName = new string(fileName.Select(ch => invalidFileChars.Any(invCh => invCh == ch) ? '_' : ch).ToArray());
-                    }
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
@@ -349,17 +342,27 @@ namespace Frends.Kungsbacka.Pdf
             return null;
         }
 
-        private static string GetFileName(PdfDictionary dict)
+        private static string GetFileName(PdfDictionary dict, bool sanitizeFileName = false)
         {
             if (dict == null)
             {
                 return null;
             }
+
             if (dict.ContainsKey(PdfName.UF))
             {
                 return dict.GetAsString(PdfName.UF).ToString();
             }
-            return dict.GetAsString(PdfName.F).ToString();
+            
+            string fileName = dict.GetAsString(PdfName.F).ToString();
+
+            if (sanitizeFileName)
+            {
+                char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
+                fileName = new string(fileName.Select(ch => invalidFileChars.Any(invCh => invCh == ch) ? '_' : ch).ToArray());
+            }
+
+            return fileName;
         }
 
         private static PdfStream GetStream(PdfDictionary dict)
