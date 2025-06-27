@@ -137,11 +137,11 @@ namespace Frends.Kungsbacka.Pdf
                 regex = GetRegexFromPattern(pattern);
             }
 
-            var list = new List<PdfAttachment>();
+            var attachments = new List<PdfAttachment>();
             int size = fileSpecArray.Size();
             if (size % 2 != 0)
             {
-                return list.AsEnumerable();
+                return attachments.AsEnumerable();
             }
 
             for (int i = 0; i < size; i += 2)
@@ -156,11 +156,11 @@ namespace Frends.Kungsbacka.Pdf
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
-					if (!list.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
+					if (!attachments.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
 					{
                         if (regex == null || regex.IsMatch(fileName))
                         {
-                            list.Add(new PdfAttachment()
+                            attachments.Add(new PdfAttachment()
                             {
                                 Name = fileName,
                                 Extension = System.IO.Path.GetExtension(fileName), //Seems to actually allow many chars but exception on some though (ex. '|')
@@ -172,7 +172,7 @@ namespace Frends.Kungsbacka.Pdf
                 }
             }
 
-            return list.AsEnumerable();
+            return attachments.AsEnumerable();
         }
 
 
@@ -388,8 +388,8 @@ namespace Frends.Kungsbacka.Pdf
         /// by replacing invalid file name characters with underscores.
         /// </summary>
         /// <param name="dict">PdfDictionary representing a file specification to get the names from</param>
-        /// <param name="sanitizeFileNames">Optionally replace invalid chars with '_'</param>
-        private static string GetFileName(PdfDictionary dict, bool sanitizeFileNames = false)
+        /// <param name="sanitizeFileName">Optionally replace invalid chars with '_'</param>
+        private static string GetFileName(PdfDictionary dict, bool sanitizeFileName = false)
         {
             if (dict == null)
             {
@@ -403,7 +403,7 @@ namespace Frends.Kungsbacka.Pdf
             
             string fileName = dict.GetAsString(PdfName.F).ToString();
 
-            if (sanitizeFileNames)
+            if (sanitizeFileName)
             {
                 char[] invalidFileChars = System.IO.Path.GetInvalidFileNameChars();
                 fileName = new string(fileName.Select(ch => invalidFileChars.Any(invCh => invCh == ch) ? '_' : ch).ToArray());
