@@ -93,6 +93,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         [Test]
         public void ExtractAttachments_MakeFilenameSafe_True_ReplacesUnsafeChars()
         {
+            //Arrange
             string UnsafeFilename = "my:unsafe/file*name?|.txt";
             string SafeFilename = "my_unsafe_file_name__.txt";
 
@@ -120,6 +121,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         [Test]
         public void ExtractAttachments_MakeFilenameSafe_False_And_Filename_Is_actually_Safe_KeepsOriginalName()
         {
+            //Arrange
             string UnsafeFilename = "my safe file name.txt";
 
             byte[] pdfWithUnsafe = TestHelper.CreatePdfWithAttachment(UnsafeFilename);
