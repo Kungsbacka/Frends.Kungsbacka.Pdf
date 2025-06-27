@@ -152,7 +152,7 @@ namespace Frends.Kungsbacka.Pdf
                 {
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
                     PdfStream stream = GetStream(refs);
-                    string fileName = GetFileName(fileSpec);
+                    string fileName = GetFileName(fileSpec, makeFilenameSafe);
 
                     string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
 
@@ -396,12 +396,16 @@ namespace Frends.Kungsbacka.Pdf
                 return null;
             }
 
+            string fileName = string.Empty;
+
             if (dict.ContainsKey(PdfName.UF))
             {
-                return dict.GetAsString(PdfName.UF).ToString();
+                fileName = dict.GetAsString(PdfName.UF).ToString();
             }
-            
-            string fileName = dict.GetAsString(PdfName.F).ToString();
+            else
+            {
+                fileName = dict.GetAsString(PdfName.F).ToString();
+            }
 
             if (sanitizeFileName)
             {
