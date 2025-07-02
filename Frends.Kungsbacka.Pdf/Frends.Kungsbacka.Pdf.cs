@@ -240,7 +240,7 @@ namespace Frends.Kungsbacka.Pdf
                 throw new ArgumentNullException(nameof(input.Html));
             }
 
-            var converter = new HtmlToPdfConverter(input, marginOptions, footerOptions);
+            var converter = new HtmlToPdfConverterOld(input, marginOptions, footerOptions);
 
             var pdf = converter.RenderHtmlAsPdf(input.Html);
 

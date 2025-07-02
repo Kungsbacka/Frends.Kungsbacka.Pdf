@@ -6,11 +6,11 @@ using System.Text;
 namespace Frends.Kungsbacka.Pdf.HtmlToPdf
 {
     //Based on https://github.com/pug-pelle-p/pugpdf
-    public class HtmlToPdfConverter
+    public class HtmlToPdfConverterOld
     {
         private const string DefaultExecutablePath = @"C:\Program Files\wkhtmltox\bin\wkhtmltopdf.exe";
 
-        public HtmlToPdfConverter(ConvertHtmlToPdfInput input, WkHtmlMarginOptions marginOptions, WkHtmlFooterOptions footerOptions)
+        public HtmlToPdfConverterOld(ConvertHtmlToPdfInput input, WkHtmlMarginOptions marginOptions, WkHtmlFooterOptions footerOptions)
         {
             if (!string.IsNullOrEmpty(input.Orientation))
             {
