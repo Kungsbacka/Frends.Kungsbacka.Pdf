@@ -1,4 +1,7 @@
+using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Layout;
 using iText.Layout.Element;
 using NUnit.Framework;
@@ -6,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -47,7 +52,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			var result = PdfTasks.ConvertEmbeddedImagesToPages(input, options);
 			var resultPdf = TestHelper.BytesToPdf(result.PdfDocument);
 
-			var resultEmbeddedFileNames = TestHelper.GetFileSpecArray(resultPdf).Where(x => x.IsString()).Select(x => Path.GetExtension(x.ToString()));
+			var resultEmbeddedFileNames = TestHelper.GetFileSpecArray(resultPdf).Where(x => x.IsString()).Select(x => System.IO.Path.GetExtension(x.ToString()));
 
 			var allowedFileTypes = new string[2] { ".pdf", ".docx" };
 
@@ -215,78 +220,128 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var result = PdfTasks.AddFooter(input);
             TestHelper.SaveResult("add-footer-test-result.pdf", result.PdfDocument);
         }
-        //Need to have the wkhtmltopdf folder copied over to C:\Program Files\wkhtmltox\bin for these tests to work
+
         [Test]
-		public void ConvertHtmlToPdfHtmlOnly()
-		{
-			var input = new ConvertHtmlToPdfInput
-			{
-				Html = TestHelper.ConvertHtmlToPdfHtml(),
-			};
+        public void ConvertHtmlToPdfHtmlOnly()
+        {
+            // arrange
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+            };
             var marginOptions = new WkHtmlMarginOptions();
-			var footerOptions = new WkHtmlFooterOptions();
+            var footerOptions = new WkHtmlFooterOptions();
 
+            // act
             var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
-			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnly-test-result.pdf", result.PdfDocument);
-		}
+            // assert
+            Assert.NotNull(result.PdfDocument);
+            Assert.True(result.PdfDocument.Length > 100);
 
-		[Test]
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            Assert.AreEqual(1, pdf.GetNumberOfPages());
+        }
+
+        [Test]
         public void ConvertHtmlToPdfHtmlOnlyLandscape()
-		{
-			var input = new ConvertHtmlToPdfInput
-			{
-				Html = TestHelper.ConvertHtmlToPdfHtml(),
-				Orientation = "Landscape"
-			};
+        {
+            // arrange
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                Orientation = "Landscape",
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+            };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
 
+            // act
             var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
-			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyLandscape-test-result.pdf", result.PdfDocument);
-		}
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
 
-		[Test]
-		public void ConvertHtmlToPdfHtmlOnlyB5PageSize()
-		{
-			var input = new ConvertHtmlToPdfInput
-			{
-				Html = TestHelper.ConvertHtmlToPdfHtml(),
-				PageSize = "B5"
-			};
+            var isLandscape =
+                pdf.GetPage(1).GetPageSize().GetWidth() > pdf.GetPage(1).GetPageSize().GetHeight();
+            Assert.True(isLandscape);
+        }
+
+        [Test]
+        public void ConvertHtmlToPdfHtmlOnlyB5PageSize()
+        {
+            // arrange
+            var tolerance = 1.0f;
+
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                PageSize = "B5",
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+            };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
 
+            // act
             var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
-			TestHelper.SaveResult("ConvertHtmlToPdfHtmlOnlyB5PageSize-test-result.pdf", result.PdfDocument);
-		}
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            Assert.AreEqual(PageSize.B5.GetWidth(), pdf.GetPage(1).GetPageSize().GetWidth(), tolerance);
+            Assert.AreEqual(PageSize.B5.GetHeight(), pdf.GetPage(1).GetPageSize().GetHeight(), tolerance);
+        }
+
         [Test]
         public void ConvertHtmlToPdfHtmlMarginTop()
         {
+            // arrange
+            var tolerance = 2f;
+            var givenMarginTop = 100; // Default is mm if no unit is specified.
+            var expectedMarginTopPt = givenMarginTop * 72f / 25.4f; // A PDF point is 1/72 inch. 1 inch = 25.4 mm.
+
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = "Landscape"
+                Orientation = "Landscape",
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
             };
+
             var marginOptions = new WkHtmlMarginOptions
             {
-                MarginTop = 100
+                MarginTop = givenMarginTop
             };
+
             var footerOptions = new WkHtmlFooterOptions();
 
+            // act
             var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
-            TestHelper.SaveResult("ConvertHtmlToPdfHtmlMarginTop-test-result.pdf", result.PdfDocument);
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+
+            var finder = new TextMarginFinder();
+            var processor = new PdfCanvasProcessor(finder);
+            processor.ProcessPageContent(pdf.GetPage(1));
+
+            var textRectangle = finder.GetTextRectangle();
+            Assert.NotNull(textRectangle);
+
+            float pageHeight = pdf.GetPage(1).GetPageSize().GetHeight();
+            float actualTopMargin = pageHeight - (textRectangle.GetY() + textRectangle.GetHeight());
+
+            Assert.AreEqual(expectedMarginTopPt, actualTopMargin, tolerance);
         }
+
         [Test]
         public void ConvertHtmlToPdfHtmlIncludeFooterLine()
         {
+            // arrange
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = "Landscape"
+                Orientation = "Landscape",
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions
@@ -294,10 +349,24 @@ namespace Frends.Kungsbacka.Pdf.Tests
                 IncludeFooterLine = true
             };
 
+            // act
             var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
 
-            TestHelper.SaveResult("ConvertHtmlToPdfHtmlIncludeFooterLine-test-result.pdf", result.PdfDocument);
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            var bytes = pdf.GetFirstPage().GetContentBytes();
+            var content = Encoding.ASCII.GetString(bytes);
+
+            // NOTE: Below is AI code. The alternative was to use a whole lot of extra code,
+            //       just to assert that the footer line was drawn.
+            // look for a "move-to (m) … line-to (l) … stroke (S)" sequence
+            // pattern:      <num> <num> m   <num> <num> l   S
+            var regextPattern = @"\d+(\.\d+)?\s+\d+(\.\d+)?\s+m\s+\d+(\.\d+)?\s+\d+(\.\d+)?\s+l\s+S";
+
+            StringAssert.IsMatch(regextPattern, content,
+                "Expected to see a stroked horizontal line operator in the PDF content stream.");
         }
+
         [Test]
 		public void ExtractTextByRegexShouldReturnSingleResultWhenOnlyOneMatch()
 		{
