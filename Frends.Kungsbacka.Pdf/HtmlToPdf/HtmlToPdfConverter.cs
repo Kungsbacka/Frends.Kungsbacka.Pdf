@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using WkHtmlToPdfDotNet;
 using WkHtmlToPdfDotNet.Contracts;
 
@@ -32,26 +31,43 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
                 paperSize = (PaperKind)Enum.Parse(typeof(PaperKind), input.PageSize, true);
             }
 
-            var globalSettings = new GlobalSettings()
-            {
-                Margins = new MarginSettings()
+            var globalSettings = 
+                new GlobalSettings()
                 {
-                    Bottom = marginOptions.MarginBottom,
-                    Top = marginOptions.MarginTop,
-                    Left = marginOptions.MarginLeft,
-                    Right = marginOptions.MarginRight,
-                    Unit = Unit.Millimeters
-                },
-                Orientation = orientation,
-                PaperSize = paperSize,
-                ImageDPI = 600,
-                ImageQuality = 90
-            };
+                    Margins = new MarginSettings()
+                    {
+                        Bottom = marginOptions.MarginBottom,
+                        Top = marginOptions.MarginTop,
+                        Left = marginOptions.MarginLeft,
+                        Right = marginOptions.MarginRight,
+                        Unit = Unit.Millimeters
+                    },
+                    Orientation = orientation,
+                    PaperSize = paperSize,
+                    ImageDPI = 600,
+                    ImageQuality = 90
+                };
 
             if (!string.IsNullOrEmpty(input.Title))
             {
                 globalSettings.DocumentTitle = input.Title;
             }
+
+            var objectSettings = 
+                new ObjectSettings()
+                {
+                    FooterSettings = new FooterSettings()
+                    {
+                        Spacing = footerOptions.FooterSpacing,
+                        HtmlUrl = footerOptions.FooterHtmlPath,
+                        Line = footerOptions.IncludeFooterLine
+                    },
+                    WebSettings = new WebSettings()
+                    {
+                        EnableIntelligentShrinking = !input.DisableSmartShrinking
+                    },
+                    HtmlContent = input.Html
+                };
 
             return
                 _converter.Convert(new HtmlToPdfDocument()
@@ -59,20 +75,7 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
                     GlobalSettings = globalSettings,
                     Objects =
                     {
-                        new ObjectSettings()
-                        {
-                            FooterSettings = new FooterSettings()
-                            {
-                                Spacing = footerOptions.FooterSpacing,
-                                HtmlUrl = footerOptions.FooterHtmlPath,
-                                Line = footerOptions.IncludeFooterLine
-                            },
-                            WebSettings = new WebSettings()
-                            {
-                                EnableIntelligentShrinking = !input.DisableSmartShrinking
-                            },
-                            HtmlContent = input.Html
-                        }
+                        objectSettings
                     }
                 });
         }

@@ -230,8 +230,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             // arrange
             var input = new ConvertHtmlToPdfInput
             {
-                Html = TestHelper.ConvertHtmlToPdfHtml(),
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Html = TestHelper.ConvertHtmlToPdfHtml()
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -255,8 +254,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             // arrange
             var input = new ConvertHtmlToPdfInput
             {
-                Html = TestHelper.ConvertHtmlToPdfHtml(),
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                Html = TestHelper.ConvertHtmlToPdfHtml()
             };
             var margins = new WkHtmlMarginOptions();
             var footer = new WkHtmlFooterOptions();
@@ -285,8 +283,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Title = expectedTitle,
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Title = expectedTitle
             };
             var margins = new WkHtmlMarginOptions();
             var footer = new WkHtmlFooterOptions();
@@ -312,8 +309,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                PageSize = pageSize,
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                PageSize = pageSize
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -338,8 +334,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = orientation,
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Orientation = orientation
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -360,8 +355,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Orientation = "Landscape"
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -384,8 +378,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                PageSize = "B5",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                PageSize = "B5"
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -411,8 +404,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Orientation = "Landscape"
             };
 
             var marginOptions = new WkHtmlMarginOptions
@@ -448,8 +440,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+                Orientation = "Landscape"
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions
