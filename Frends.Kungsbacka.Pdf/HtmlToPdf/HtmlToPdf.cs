@@ -85,6 +85,7 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
             return path;
         }
 
+        // TODO: Do we need to include something like this in the new HtmlToPdfConverter? /ANST
         private string SpecialCharsEncode(string text)
         {
             var charArray = text.ToCharArray();

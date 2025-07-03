@@ -248,6 +248,34 @@ namespace Frends.Kungsbacka.Pdf.Tests
             Assert.AreEqual(1, pdf.GetNumberOfPages());
         }
 
+
+        [Test]
+        public void ConvertHtmlToPdf_UsesCorrectEncoding()
+        {
+            // arrange
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+            };
+            var margins = new WkHtmlMarginOptions();
+            var footer = new WkHtmlFooterOptions();
+
+            // act
+            var result = PdfTasks.ConvertHtmlToPdf(input, margins, footer);
+
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+
+            // extract all text from page 1
+            var text = PdfTextExtractor.GetTextFromPage(pdf.GetFirstPage());
+
+            // now just look for your Swedish string
+            StringAssert.Contains(
+                "Detta är en text i mitten av dokumentet. Specialtecken: !#¤%&/()=?éèì",
+                text);
+        }
+
         [Test]
         public void ConvertHtmlToPdf_SetsDocumentTitleInMetadata()
         {
