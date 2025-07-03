@@ -225,7 +225,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         }
 
         [Test]
-        public void ConvertHtmlToPdfHtmlOnly()
+        public void ConvertHtmlToPdf_HtmlOnly()
         {
             // arrange
             var input = new ConvertHtmlToPdfInput
@@ -248,9 +248,35 @@ namespace Frends.Kungsbacka.Pdf.Tests
             Assert.AreEqual(1, pdf.GetNumberOfPages());
         }
 
+        [Test]
+        public void ConvertHtmlToPdf_SetsDocumentTitleInMetadata()
+        {
+            // arrange
+            var expectedTitle = "My Title";
+
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                Title = expectedTitle,
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+            };
+            var margins = new WkHtmlMarginOptions();
+            var footer = new WkHtmlFooterOptions();
+
+            // act
+            var result = PdfTasks.ConvertHtmlToPdf(input, margins, footer);
+
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            var info = pdf.GetDocumentInfo();
+
+            Assert.AreEqual(expectedTitle, pdf.GetDocumentInfo().GetTitle());
+        }
+
+
         [TestCase(null)]
         [TestCase("")]
-        public void ConvertHtmlToPdfHtmlDefaultsToPageSizeA4(string pageSize)
+        public void ConvertHtmlToPdf_DefaultsToPageSizeA4(string pageSize)
         {
             // arrange
             var tolerance = 1.0f;
@@ -276,7 +302,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
         [TestCase(null)]
         [TestCase("")]
-        public void ConvertHtmlToPdfHtmlDefaultsToOrientationPortrait(string orientation)
+        public void ConvertHtmlToPdf_DefaultsToOrientationPortrait(string orientation)
         {
             // arrange
             var tolerance = 1.0f;
@@ -300,7 +326,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         }
 
         [Test]
-        public void ConvertHtmlToPdfHtmlOnlyLandscape()
+        public void ConvertHtmlToPdf_OnlyLandscape()
         {
             // arrange
             var input = new ConvertHtmlToPdfInput
@@ -322,7 +348,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         }
 
         [Test]
-        public void ConvertHtmlToPdfHtmlOnlyB5PageSize()
+        public void ConvertHtmlToPdf_OnlyB5PageSize()
         {
             // arrange
             var tolerance = 1.0f;
@@ -347,7 +373,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         }
 
         [Test]
-        public void ConvertHtmlToPdfHtmlMarginTop()
+        public void ConvertHtmlToPdf_MarginTop()
         {
             // arrange
             var tolerance = 2f;
@@ -388,7 +414,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         }
 
         [Test]
-        public void ConvertHtmlToPdfHtmlIncludeFooterLine()
+        public void ConvertHtmlToPdf_IncludeFooterLine()
         {
             // arrange
             var input = new ConvertHtmlToPdfInput

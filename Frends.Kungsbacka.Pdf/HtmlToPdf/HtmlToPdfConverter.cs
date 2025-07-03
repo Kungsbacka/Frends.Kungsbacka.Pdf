@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using WkHtmlToPdfDotNet;
 using WkHtmlToPdfDotNet.Contracts;
 
@@ -31,22 +32,31 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
                 paperSize = (PaperKind)Enum.Parse(typeof(PaperKind), input.PageSize, true);
             }
 
+            var globalSettings = new GlobalSettings()
+            {
+                Margins = new MarginSettings()
+                {
+                    Bottom = marginOptions.MarginBottom,
+                    Top = marginOptions.MarginTop,
+                    Left = marginOptions.MarginLeft,
+                    Right = marginOptions.MarginRight,
+                    Unit = Unit.Millimeters
+                },
+                Orientation = orientation,
+                PaperSize = paperSize,
+                ImageDPI = 600,
+                ImageQuality = 90
+            };
+
+            if (!string.IsNullOrEmpty(input.Title))
+            {
+                globalSettings.DocumentTitle = input.Title;
+            }
+
             return
                 _converter.Convert(new HtmlToPdfDocument()
                 {
-                    GlobalSettings = new GlobalSettings()
-                    {
-                        Margins = new MarginSettings()
-                        {
-                            Bottom = marginOptions.MarginBottom,
-                            Top = marginOptions.MarginTop,
-                            Left = marginOptions.MarginLeft,
-                            Right = marginOptions.MarginRight,
-                            Unit = Unit.Millimeters
-                        },
-                        Orientation = orientation,
-                        PaperSize = paperSize
-                    },
+                    GlobalSettings = globalSettings,
                     Objects =
                     {
                         new ObjectSettings()
