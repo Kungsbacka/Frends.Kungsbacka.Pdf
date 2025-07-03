@@ -1,5 +1,4 @@
-﻿using iText.Kernel.Geom;
-using System;
+﻿using System;
 using WkHtmlToPdfDotNet;
 using WkHtmlToPdfDotNet.Contracts;
 
@@ -19,9 +18,13 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
             WkHtmlMarginOptions marginOptions,
             WkHtmlFooterOptions footerOptions)
         {
+            var orientation = Orientation.Portrait;
             var paperSize = PaperKind.A4;
 
-            // TODO: Add validation for Orientation /ANST
+            if (!string.IsNullOrEmpty(input.Orientation))
+            {
+                orientation = (Orientation)Enum.Parse(typeof(Orientation), input.Orientation, true);
+            }
 
             if (!string.IsNullOrEmpty(input.PageSize))
             {
@@ -41,9 +44,8 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
                             Right = marginOptions.MarginRight,
                             Unit = Unit.Millimeters
                         },
-                        Orientation = input.Orientation == "Landscape" ? WkHtmlToPdfDotNet.Orientation.Landscape : WkHtmlToPdfDotNet.Orientation.Portrait,
-
-                        PaperSize = paperSize // TODO: Make dynamic
+                        Orientation = orientation,
+                        PaperSize = paperSize
                     },
                     Objects =
                     {

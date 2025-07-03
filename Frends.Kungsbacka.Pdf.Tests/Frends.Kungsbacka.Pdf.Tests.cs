@@ -244,6 +244,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             Assert.True(result.PdfDocument.Length > 100);
 
             var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+
             Assert.AreEqual(1, pdf.GetNumberOfPages());
         }
 
@@ -268,8 +269,34 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
             // assert
             var pdf = TestHelper.BytesToPdf(result.PdfDocument);
-            Assert.AreEqual(PageSize.A4.GetWidth(), pdf.GetPage(1).GetPageSize().GetWidth(), tolerance);
-            Assert.AreEqual(PageSize.A4.GetHeight(), pdf.GetPage(1).GetPageSize().GetHeight(), tolerance);
+
+            Assert.AreEqual(PageSize.A4.GetWidth(), pdf.GetFirstPage().GetPageSize().GetWidth(), tolerance);
+            Assert.AreEqual(PageSize.A4.GetHeight(), pdf.GetFirstPage().GetPageSize().GetHeight(), tolerance);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        public void ConvertHtmlToPdfHtmlDefaultsToOrientationPortrait(string orientation)
+        {
+            // arrange
+            var tolerance = 1.0f;
+
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                Orientation = orientation,
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+            };
+            var marginOptions = new WkHtmlMarginOptions();
+            var footerOptions = new WkHtmlFooterOptions();
+
+            // act
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
+
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+
+            Assert.Less(pdf.GetFirstPage().GetPageSize().GetWidth(), pdf.GetFirstPage().GetPageSize().GetHeight());
         }
 
         [Test]
@@ -291,9 +318,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             // assert
             var pdf = TestHelper.BytesToPdf(result.PdfDocument);
 
-            var isLandscape =
-                pdf.GetPage(1).GetPageSize().GetWidth() > pdf.GetPage(1).GetPageSize().GetHeight();
-            Assert.True(isLandscape);
+            Assert.Less(pdf.GetFirstPage().GetPageSize().GetHeight(), pdf.GetFirstPage().GetPageSize().GetWidth());
         }
 
         [Test]
@@ -316,8 +341,9 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
             // assert
             var pdf = TestHelper.BytesToPdf(result.PdfDocument);
-            Assert.AreEqual(PageSize.B5.GetWidth(), pdf.GetPage(1).GetPageSize().GetWidth(), tolerance);
-            Assert.AreEqual(PageSize.B5.GetHeight(), pdf.GetPage(1).GetPageSize().GetHeight(), tolerance);
+
+            Assert.AreEqual(PageSize.B5.GetWidth(), pdf.GetFirstPage().GetPageSize().GetWidth(), tolerance);
+            Assert.AreEqual(PageSize.B5.GetHeight(), pdf.GetFirstPage().GetPageSize().GetHeight(), tolerance);
         }
 
         [Test]
@@ -355,7 +381,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var textRectangle = finder.GetTextRectangle();
             Assert.NotNull(textRectangle);
 
-            float pageHeight = pdf.GetPage(1).GetPageSize().GetHeight();
+            float pageHeight = pdf.GetFirstPage().GetPageSize().GetHeight();
             float actualTopMargin = pageHeight - (textRectangle.GetY() + textRectangle.GetHeight());
 
             Assert.AreEqual(expectedMarginTopPt, actualTopMargin, tolerance);
