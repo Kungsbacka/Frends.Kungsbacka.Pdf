@@ -5,12 +5,15 @@ using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Layout;
 using iText.Layout.Element;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using WkHtmlToPdfDotNet;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -228,7 +231,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -244,6 +247,31 @@ namespace Frends.Kungsbacka.Pdf.Tests
             Assert.AreEqual(1, pdf.GetNumberOfPages());
         }
 
+        [TestCase(null)]
+        [TestCase("")]
+        public void ConvertHtmlToPdfHtmlDefaultsToPageSizeA4(string pageSize)
+        {
+            // arrange
+            var tolerance = 1.0f;
+
+            var input = new ConvertHtmlToPdfInput
+            {
+                Html = TestHelper.ConvertHtmlToPdfHtml(),
+                PageSize = pageSize,
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
+            };
+            var marginOptions = new WkHtmlMarginOptions();
+            var footerOptions = new WkHtmlFooterOptions();
+
+            // act
+            var result = PdfTasks.ConvertHtmlToPdf(input, marginOptions, footerOptions);
+
+            // assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            Assert.AreEqual(PageSize.A4.GetWidth(), pdf.GetPage(1).GetPageSize().GetWidth(), tolerance);
+            Assert.AreEqual(PageSize.A4.GetHeight(), pdf.GetPage(1).GetPageSize().GetHeight(), tolerance);
+        }
+
         [Test]
         public void ConvertHtmlToPdfHtmlOnlyLandscape()
         {
@@ -252,7 +280,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
                 Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -278,7 +306,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
                 PageSize = "B5",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions();
@@ -304,7 +332,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
                 Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
             };
 
             var marginOptions = new WkHtmlMarginOptions
@@ -341,7 +369,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
                 Orientation = "Landscape",
-                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe"
+                ExecutablePath = @"C:\temp\wkhtmltox\bin\wkhtmltopdf.exe" // TODO: Remove /ANST
             };
             var marginOptions = new WkHtmlMarginOptions();
             var footerOptions = new WkHtmlFooterOptions

@@ -1,4 +1,6 @@
-﻿using WkHtmlToPdfDotNet;
+﻿using iText.Kernel.Geom;
+using System;
+using WkHtmlToPdfDotNet;
 using WkHtmlToPdfDotNet.Contracts;
 
 namespace Frends.Kungsbacka.Pdf.HtmlToPdf
@@ -17,7 +19,14 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
             WkHtmlMarginOptions marginOptions,
             WkHtmlFooterOptions footerOptions)
         {
-            // TODO: Should we include argument validation for Orientation and PageSize? See HtmlToPdf.cs /ANST
+            var paperSize = PaperKind.A4;
+
+            // TODO: Add validation for Orientation /ANST
+
+            if (!string.IsNullOrEmpty(input.PageSize))
+            {
+                paperSize = (PaperKind)Enum.Parse(typeof(PaperKind), input.PageSize, true);
+            }
 
             return
                 _converter.Convert(new HtmlToPdfDocument()
@@ -34,7 +43,7 @@ namespace Frends.Kungsbacka.Pdf.HtmlToPdf
                         },
                         Orientation = input.Orientation == "Landscape" ? WkHtmlToPdfDotNet.Orientation.Landscape : WkHtmlToPdfDotNet.Orientation.Portrait,
 
-                        PaperSize = PaperKind.B5 // TODO: Make dynamic
+                        PaperSize = paperSize // TODO: Make dynamic
                     },
                     Objects =
                     {
