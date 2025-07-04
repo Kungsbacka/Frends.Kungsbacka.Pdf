@@ -258,13 +258,5 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DefaultValue(true)]
         public bool DisableSmartShrinking { get; set; } = true;
-
-        /// <summary>
-        /// Path to wkhtmltopdf executable.
-        /// The default path is 'C:\Program Files\wkhtmltox\bin\wkhtmltopdf.exe'
-        /// </summary>
-        [DisplayFormat(DataFormatString = "Text")]
-        public string ExecutablePath { get; set; }
-        
     }
 }

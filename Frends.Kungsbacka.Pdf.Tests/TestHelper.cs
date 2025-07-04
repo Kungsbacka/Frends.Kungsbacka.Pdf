@@ -119,7 +119,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 					<p class='center'>Hej!</p>
 
                     <div class='center margin-top'>
-                        <div>Detta är en  text i mitten av dokumentet</div>
+                        <div>Detta är en text i mitten av dokumentet. Specialtecken: !#¤%&/()=?éèì</div>
                     </div>
 
                     <div class='left margin-top'>Detta är lite text längst till vänster i dokumentet</div>
