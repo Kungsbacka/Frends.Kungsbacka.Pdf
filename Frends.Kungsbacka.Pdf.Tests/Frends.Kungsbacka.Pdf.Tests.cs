@@ -1,19 +1,11 @@
 using iText.Kernel.Geom;
-using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
-using iText.Layout;
-using iText.Layout.Element;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using WkHtmlToPdfDotNet;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -329,8 +321,6 @@ namespace Frends.Kungsbacka.Pdf.Tests
         public void ConvertHtmlToPdf_DefaultsToOrientationPortrait(string orientation)
         {
             // arrange
-            var tolerance = 1.0f;
-
             var input = new ConvertHtmlToPdfInput
             {
                 Html = TestHelper.ConvertHtmlToPdfHtml(),
