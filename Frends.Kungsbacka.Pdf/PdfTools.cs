@@ -121,7 +121,8 @@ namespace Frends.Kungsbacka.Pdf
         /// <param name="pattern">Optional filter for file names</param>
         /// <param name="extractOepPrefix">Optional boolean for extracting oep prefixes from the description</param>
         /// <param name="makeFilenameSafe">Optional boolean for replacing system disallowed file name characters with '_'</param>
-        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false, bool makeFilenameSafe = true)
+        /// <param name="appendAttachmentNumber">Optional boolean for appending the attachment number to the file name to avoid duplicates</param>
+        public static IEnumerable<PdfAttachment> ExtractAttachments(PdfDocument pdfDocument, string pattern = "", bool extractOepPrefix = false, bool makeFilenameSafe = true, bool appendAttachmentNumber = false)
         {
             PdfArray fileSpecArray = GetFileSpecArray(pdfDocument);
 
@@ -138,6 +139,7 @@ namespace Frends.Kungsbacka.Pdf
             }
 
             var attachments = new List<PdfAttachment>();
+            int attachmentNumber = 0;
             int size = fileSpecArray.Size();
             if (size % 2 != 0)
             {
@@ -150,24 +152,30 @@ namespace Frends.Kungsbacka.Pdf
 
                 if (fileSpec != null)
                 {
-                    PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);  
+                    PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
                     PdfStream stream = GetStream(refs);
-                    string fileName = GetFileName(fileSpec, makeFilenameSafe);
 
-                    string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, fileName) : string.Empty;
+                    if (stream == null)
+                        continue;
 
-					if (!attachments.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == fileName))
-					{
-                        if (regex == null || regex.IsMatch(fileName))
+                    string originalName = GetFileName(fileSpec, makeFilenameSafe);
+
+                    if (regex == null || regex.IsMatch(originalName))
+                    {
+                        attachmentNumber++;
+
+                        string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, originalName) : string.Empty;
+                        string ext = System.IO.Path.GetExtension(originalName);
+                        string nameOnly = System.IO.Path.GetFileNameWithoutExtension(originalName);
+                        string finalName = BuildAttachmentName(originalName, attachmentNumber, appendAttachmentNumber);
+
+                        attachments.Add(new PdfAttachment()
                         {
-                            attachments.Add(new PdfAttachment()
-                            {
-                                Name = fileName,
-                                Extension = System.IO.Path.GetExtension(fileName), //Seems to actually allow many chars but exception on some though (ex. '|')
-                                Data = stream.GetBytes(),
-                                OepPrefix = oepPrefix
-                            });
-                        }
+                            Name = finalName,
+                            Extension = ext,
+                            Data = stream.GetBytes(),
+                            OepPrefix = oepPrefix
+                        });
                     }
                 }
             }
@@ -194,6 +202,19 @@ namespace Frends.Kungsbacka.Pdf
             }
 
             return string.Empty;
+        }
+
+
+        private static string BuildAttachmentName(string originalName, int index, bool appendNumber)
+        {
+            if (!appendNumber) return originalName;
+
+            string ext = System.IO.Path.GetExtension(originalName);
+            string nameOnly = System.IO.Path.GetFileNameWithoutExtension(originalName);
+
+            return string.IsNullOrEmpty(ext)
+                ? $"{nameOnly}_bilaga{index}"
+                : $"{nameOnly}_bilaga{index}{ext}";
         }
 
 
