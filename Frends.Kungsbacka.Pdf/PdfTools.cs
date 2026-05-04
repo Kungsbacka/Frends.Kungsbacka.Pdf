@@ -167,11 +167,11 @@ namespace Frends.Kungsbacka.Pdf
                         string oepPrefix = extractOepPrefix ? GetOepFilePrefix(fileSpec, originalName) : string.Empty;
                         string ext = System.IO.Path.GetExtension(originalName);
                         string nameOnly = System.IO.Path.GetFileNameWithoutExtension(originalName);
-                        string finalName = BuildAttachmentName(originalName, attachmentNumber, appendAttachmentNumber);
+                        string fileName = BuildAttachmentName(originalName, attachmentNumber, appendAttachmentNumber);
 
                         attachments.Add(new PdfAttachment()
                         {
-                            Name = finalName,
+                            Name = fileName,
                             Extension = ext,
                             Data = stream.GetBytes(),
                             OepPrefix = oepPrefix
