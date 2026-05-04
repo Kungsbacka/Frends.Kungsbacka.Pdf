@@ -57,6 +57,12 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         [DefaultValueAttribute(true)]
         public bool MakeFilenameSafe { get; set; } = true;
+
+        /// <summary>
+        /// Append an ordinal suffix "_bilagaN" before the extension to make file names unique.
+        /// </summary>
+        [DefaultValueAttribute(false)]
+        public bool AppendAttachmentNumber { get; set; } = false;
     }
 
     public class WkHtmlMarginOptions
