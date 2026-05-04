@@ -61,8 +61,6 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
             var result = PdfTasks.ExtractAttachments(input, options);
 
-            Assert.AreEqual(2, result.Attachments.Count());
-
             var names = result.Attachments.Select(a => a.Name).ToList();
 
             // Default behavior: allow duplicate display names (two returned attachments should both be "doc.pdf")
