@@ -12,6 +12,7 @@ using iText.Layout.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 
 namespace Frends.Kungsbacka.Pdf
@@ -145,7 +146,7 @@ namespace Frends.Kungsbacka.Pdf
             {
                 return attachments.AsEnumerable();
             }
-
+            
             for (int i = 0; i < size; i += 2)
             {
                 PdfDictionary fileSpec = fileSpecArray.GetAsDictionary(i + 1);
@@ -154,11 +155,17 @@ namespace Frends.Kungsbacka.Pdf
                 {
                     PdfDictionary refs = fileSpec.GetAsDictionary(PdfName.EF);
                     PdfStream stream = GetStream(refs);
+                    string originalName = GetFileName(fileSpec, makeFilenameSafe);
 
                     if (stream == null)
+                    {
                         continue;
+                    }
 
-                    string originalName = GetFileName(fileSpec, makeFilenameSafe);
+                    if (attachments.Any(x => x.Data.Length == stream.GetBytes().Length && x.Name == originalName))
+                    {
+                        continue;
+                    }
 
                     if (regex == null || regex.IsMatch(originalName))
                     {

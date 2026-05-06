@@ -53,7 +53,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
         [Test]
         public void ExtractAttachments_DoesNotAppend_WhenNotRequested()
         {
-            var fileNames = new[] { "doc.pdf", "doc.pdf" };
+            var fileNames = new[] { "doc.pdf", "doc1.pdf" };
             var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
 
             var input = new PdfDocumentInput { PdfDocument = pdfBytes };
@@ -64,14 +64,14 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var names = result.Attachments.Select(a => a.Name).ToList();
 
             // Default behavior: allow duplicate display names (two returned attachments should both be "doc.pdf")
-            var expected = new[] { "doc.pdf", "doc.pdf" };
+            var expected = new[] { "doc.pdf", "doc1.pdf" };
             CollectionAssert.AreEqual(expected, names);
         }
 
         [Test]
         public void ExtractAttachments_DoesNotAppend_WhenAppendAttachmentNumberNotSet()
         {
-            var fileNames = new[] { "doc.pdf", "doc.pdf" };
+            var fileNames = new[] { "doc.pdf", "doc1.pdf" };
             var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
 
             var input = new PdfDocumentInput { PdfDocument = pdfBytes };
@@ -82,7 +82,25 @@ namespace Frends.Kungsbacka.Pdf.Tests
             var names = result.Attachments.Select(a => a.Name).ToList();
 
             // Default behavior: allow duplicate display names
-            var expected = new[] { "doc.pdf", "doc.pdf" };
+            var expected = new[] { "doc.pdf", "doc1.pdf" };
+            CollectionAssert.AreEqual(expected, names);
+        }
+
+        [Test]
+        public void ExtractAttachments_RemovesDuplicates_WhenFilesAreSameLengthAndHaveSameName()
+        {
+            var fileNames = new[] { "doc.pdf", "doc.pdf" };
+            var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
+
+            var input = new PdfDocumentInput { PdfDocument = pdfBytes };
+            var options = new ExtractAttachmentsOptions { Filter = "*", MakeFilenameSafe = true };
+
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            var names = result.Attachments.Select(a => a.Name).ToList();
+
+            // Default behavior: allow duplicate display names
+            var expected = new[] { "doc.pdf" };
             CollectionAssert.AreEqual(expected, names);
         }
 
