@@ -99,7 +99,6 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
             var names = result.Attachments.Select(a => a.Name).ToList();
 
-            // Default behavior: allow duplicate display names
             var expected = new[] { "doc.pdf" };
             CollectionAssert.AreEqual(expected, names);
         }
