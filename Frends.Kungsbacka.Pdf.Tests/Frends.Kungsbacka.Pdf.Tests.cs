@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -574,10 +575,60 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
 			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
 
-			Assert.Throws<ArgumentException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
+			Assert.Throws<RegexParseException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
 		}
 
-		[Test]
+        [Test]
+        public void ExtractAllText_ExtractsCorrectTextFromPDF()
+        {
+            // Arrange
+            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            // Act
+            var result = PdfTasks.ExtractAllText(pdfBytes);
+            // Assert
+            Assert.IsNotEmpty(result);
+            Assert.AreEqual("Test PDF ", result[0]);
+            Assert.AreEqual("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the ", result[1]);
+            Assert.AreEqual("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the ", result[13]);
+        }
+
+        [Test]
+        public void ExtractAllText_ExtractsCorrectTextFromPDFWithMultiplePages()
+        {
+            // Arrange
+            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages);
+            // Act
+            var result = PdfTasks.ExtractAllText(pdfBytes);
+
+            // Assert
+            Assert.IsNotEmpty(result);
+            //First page
+            Assert.AreEqual("Test file #1", result[0]);
+            Assert.AreEqual("This is a test document used for unit testing of PDF", result[1]);
+            // Second page
+            Assert.AreEqual("Test file #1", result[28]);
+            Assert.AreEqual("This is a test document used for unit testing of PDF", result[29]);
+        }
+
+        [Test]
+        public void ExtractAllText_ThrowsExceptionWhenInputIsNull()
+        {
+            // Arrange
+            byte[] pdfBytes = null;
+
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(pdfBytes));
+        }
+
+
+        [Test]
+        public void ExtractAllText_ThrowsExceptionWhenInputIsEmpty()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(Array.Empty<byte>()));
+        }
+
+        [Test]
 		public void MergePDFs_MultiplePdfDocumentInputShouldBeMergedIntoOnePdfDocumentWithTwoPages()
 		{
 			// Arrange

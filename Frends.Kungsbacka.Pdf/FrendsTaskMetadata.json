@@ -23,6 +23,9 @@
 		},
 		{
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractTextByRegex"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractAllText"
 		}
 	]
 }

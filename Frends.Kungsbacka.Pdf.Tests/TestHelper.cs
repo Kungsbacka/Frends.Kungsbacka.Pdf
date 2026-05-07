@@ -10,7 +10,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 {
     internal static class TestHelper
     {
-        public enum TestDocumentTypes { WithAttachments, NoAttachments, ExtractText };
+        public enum TestDocumentTypes { WithAttachments, NoAttachments, ExtractText, ExtractTextMultiplePages };
 
         public static byte[] GetTestDocument(TestDocumentTypes testDocumentType)
         {
@@ -26,7 +26,10 @@ namespace Frends.Kungsbacka.Pdf.Tests
                 case TestDocumentTypes.ExtractText:
 					fileName = "Loremipsum.pdf";
 					break;
-				default:
+                case TestDocumentTypes.ExtractTextMultiplePages:
+                    fileName = "Mulitplepages.pdf";
+                    break;
+                default:
                     throw new ArgumentException(nameof(testDocumentType));
             }
             return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", fileName));
