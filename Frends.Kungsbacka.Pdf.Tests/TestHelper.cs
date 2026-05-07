@@ -33,29 +33,39 @@ namespace Frends.Kungsbacka.Pdf.Tests
                     throw new ArgumentException(nameof(testDocumentType));
             }
             return File.ReadAllBytes(Path.Combine(TestContext.CurrentContext.TestDirectory, "doc", fileName));
-
         }
 
         /// <summary>
-        /// Creates an in-memory PDF with a single file attachment named fileName.
+        /// Creates an in-memory PDF with one or many file attachments named fileName.
         /// </summary>
-        public static byte[] CreatePdfWithAttachment(string fileName)
+        public static byte[] CreatePdfWithAttachment(params string[] fileNames)
         {
             using (var ms = new MemoryStream())
             using (var writer = new PdfWriter(ms))
             using (var pdfDoc = new PdfDocument(writer))
             {
                 var fileBytes = new byte[] { 1, 2, 3 };
-                PdfFileSpec fs = PdfFileSpec.CreateEmbeddedFileSpec(
-                    pdfDoc,
-                    fileBytes,
-                    fileName,               // file specification name
-                    fileName,               // display file name
-                    null,                   // MIME type (none)
-                    new PdfDictionary(),    // params (empty)
-                    PdfName.Data            // AFRelationship
-                );
-                pdfDoc.AddFileAttachment(fileName, fs);
+                int idx = 0;
+                foreach (var fileName in fileNames)
+                {
+                    idx++;
+                    // Use a unique internal attachment key that preserves the
+                    // insertion order when stored in the PDF name tree. The PDF
+                    // name tree requires keys to be sorted; prefixing with a
+                    // zero-padded index ensures the lexical sort matches the
+                    // original order.
+                    var internalName = idx.ToString("D4") + "_" + fileName;
+                    PdfFileSpec fs = PdfFileSpec.CreateEmbeddedFileSpec(
+                        pdfDoc,
+                        fileBytes,
+                        internalName,           // file specification name (internal key)
+                        fileName,               // display file name
+                        null,                   // MIME type (none)
+                        new PdfDictionary(),    // params (empty)
+                        PdfName.Data            // AFRelationship
+                    );
+                    pdfDoc.AddFileAttachment(internalName, fs);
+                }
                 pdfDoc.Close();
                 return ms.ToArray();
             }
