@@ -282,13 +282,39 @@ namespace Frends.Kungsbacka.Pdf
 			}
 		}
 
-		
-		/// <summary>
-		/// Merges several PDF:s together
-		/// </summary>
-		/// <param name="input">Mandatory parameters</param>
-		/// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
-		public static PdfDocumentResult MergePdfs([PropertyTab] List<PdfDocumentInput> input)
+
+        /// <summary>
+        /// Extracts all text from every page of a PDF and returns it as an array of lines.
+        /// </summary>
+        /// <param name="pdfBytes">The raw bytes of the PDF file to extract text from.</param>
+        /// <returns>An array of strings where each element represents one line of text.</returns>
+        public static string[] ExtractAllText(byte[] pdfBytes)
+        {
+            if (pdfBytes is null || pdfBytes.Length == 0)
+            {
+                throw new ArgumentNullException(nameof(pdfBytes));
+            }
+
+            using var memoryStream = new MemoryStream(pdfBytes);
+            using var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
+
+            var stringBuilder = new StringBuilder();
+
+            for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+            {
+                var pageText = PdfTextExtractor.GetTextFromPage(pdfDocument.GetPage(i), new SimpleTextExtractionStrategy());
+                stringBuilder.AppendLine(pageText);
+            }
+
+            return stringBuilder.ToString().Split(new[] { "\n", "\r" }, StringSplitOptions.None);
+        }
+
+        /// <summary>
+        /// Merges several PDF:s together
+        /// </summary>
+        /// <param name="input">Mandatory parameters</param>
+        /// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
+        public static PdfDocumentResult MergePdfs([PropertyTab] List<PdfDocumentInput> input)
 		{
 			if (input is null)
 			{
