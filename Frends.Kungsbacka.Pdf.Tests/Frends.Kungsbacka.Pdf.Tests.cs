@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Frends.Kungsbacka.Pdf.Tests
 {
@@ -574,7 +575,7 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
 			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
 
-			Assert.Throws<ArgumentException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
+			Assert.Throws<RegexParseException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
 		}
 
         [Test]
