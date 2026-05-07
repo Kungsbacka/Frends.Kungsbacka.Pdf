@@ -30,10 +30,83 @@ namespace Frends.Kungsbacka.Pdf.Tests
             TestHelper.SaveResult("convert-embedded-images-to-pages-test-result.pdf", result.PdfDocument);
 		}
 
-		/// <summary>
-		/// Test ConvertEmbeddedImagesToPagesShouldOnlyContainDocuments
-		/// </summary>
-		[Test]
+        [Test]
+        public void ExtractAttachments_AppendsNumber_WhenRequested()
+        {
+            var fileNames = new[] { "doc.pdf", "doc.pdf", "other.txt" };
+            var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
+
+            var input = new PdfDocumentInput { PdfDocument = pdfBytes };
+            var options = new ExtractAttachmentsOptions { Filter = "*", MakeFilenameSafe = true, AppendAttachmentNumber = true };
+
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            Assert.AreEqual(3, result.Attachments.Count());
+
+            var names = result.Attachments.Select(a => a.Name).ToList();
+
+            // Expect exact file names in order when appending numbers
+            var expected = new[] { "doc_bilaga1.pdf", "doc_bilaga2.pdf", "other_bilaga3.txt" };
+            CollectionAssert.AreEqual(expected, names);
+        }
+
+        [Test]
+        public void ExtractAttachments_DoesNotAppend_WhenNotRequested()
+        {
+            var fileNames = new[] { "doc.pdf", "doc1.pdf" };
+            var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
+
+            var input = new PdfDocumentInput { PdfDocument = pdfBytes };
+            var options = new ExtractAttachmentsOptions { Filter = "*", MakeFilenameSafe = true, AppendAttachmentNumber = false };
+
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            var names = result.Attachments.Select(a => a.Name).ToList();
+
+            // Default behavior: allow duplicate display names (two returned attachments should both be "doc.pdf")
+            var expected = new[] { "doc.pdf", "doc1.pdf" };
+            CollectionAssert.AreEqual(expected, names);
+        }
+
+        [Test]
+        public void ExtractAttachments_DoesNotAppend_WhenAppendAttachmentNumberNotSet()
+        {
+            var fileNames = new[] { "doc.pdf", "doc1.pdf" };
+            var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
+
+            var input = new PdfDocumentInput { PdfDocument = pdfBytes };
+            var options = new ExtractAttachmentsOptions { Filter = "*", MakeFilenameSafe = true};
+
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            var names = result.Attachments.Select(a => a.Name).ToList();
+
+            // Default behavior: allow duplicate display names
+            var expected = new[] { "doc.pdf", "doc1.pdf" };
+            CollectionAssert.AreEqual(expected, names);
+        }
+
+        [Test]
+        public void ExtractAttachments_RemovesDuplicates_WhenFilesAreSameLengthAndHaveSameName()
+        {
+            var fileNames = new[] { "doc.pdf", "doc.pdf" };
+            var pdfBytes = TestHelper.CreatePdfWithAttachment(fileNames);
+
+            var input = new PdfDocumentInput { PdfDocument = pdfBytes };
+            var options = new ExtractAttachmentsOptions { Filter = "*", MakeFilenameSafe = true };
+
+            var result = PdfTasks.ExtractAttachments(input, options);
+
+            var names = result.Attachments.Select(a => a.Name).ToList();
+
+            var expected = new[] { "doc.pdf" };
+            CollectionAssert.AreEqual(expected, names);
+        }
+
+        /// <summary>
+        /// Test ConvertEmbeddedImagesToPagesShouldOnlyContainDocuments
+        /// </summary>
+        [Test]
 		public void ConvertEmbeddedImagesToPagesShouldOnlyContainDocuments()
 		{
 			var input = new PdfDocumentInput
