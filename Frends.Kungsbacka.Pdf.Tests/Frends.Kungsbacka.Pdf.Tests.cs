@@ -537,9 +537,9 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
 			var regex = @"\bTest\b";
 
-			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+			var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText) };
 
-			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+			var result = PdfTasks.ExtractTextByRegex(pdfDocumentInput, regex);
 
 			Assert.AreEqual(result.Length, 4);
 			Assert.AreEqual(result, expectedResult);
@@ -551,9 +551,9 @@ namespace Frends.Kungsbacka.Pdf.Tests
              
 			var regex = @"\bsimply dummy text\b";
 
-            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText) };
 
-			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+            var result = PdfTasks.ExtractTextByRegex(pdfDocumentInput, regex);
 
 			Assert.AreEqual(result, expectedResult);
 		}
@@ -562,9 +562,9 @@ namespace Frends.Kungsbacka.Pdf.Tests
 		{
 			var regex = @"\bTextThatShouldBeMissing\b";
 
-			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText) };
 
-			var result = PdfTasks.ExtractTextByRegex(pdfBytes, regex);
+			var result = PdfTasks.ExtractTextByRegex(pdfDocumentInput, regex);
 
 			Assert.IsEmpty(result);
 		}
@@ -573,18 +573,18 @@ namespace Frends.Kungsbacka.Pdf.Tests
 		{
 			var regex = @"\InvalidRegex\";
 
-			var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText) };
 
-			Assert.Throws<RegexParseException>(() => PdfTasks.ExtractTextByRegex(pdfBytes, regex));
+            Assert.Throws<RegexParseException>(() => PdfTasks.ExtractTextByRegex(pdfDocumentInput, regex));
 		}
 
         [Test]
         public void ExtractAllText_ExtractsCorrectTextFromPDF()
         {
             // Arrange
-            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText) };
             // Act
-            var result = PdfTasks.ExtractAllText(pdfBytes);
+            var result = PdfTasks.ExtractAllText(pdfDocumentInput);
             // Assert
             Assert.IsNotEmpty(result);
             Assert.AreEqual("Test PDF ", result[0]);
@@ -596,9 +596,9 @@ namespace Frends.Kungsbacka.Pdf.Tests
         public void ExtractAllText_ExtractsCorrectTextFromPDFWithMultiplePages()
         {
             // Arrange
-            var pdfBytes = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages);
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages) };
             // Act
-            var result = PdfTasks.ExtractAllText(pdfBytes);
+            var result = PdfTasks.ExtractAllText(pdfDocumentInput);
 
             // Assert
             Assert.IsNotEmpty(result);
@@ -614,18 +614,20 @@ namespace Frends.Kungsbacka.Pdf.Tests
         public void ExtractAllText_ThrowsExceptionWhenInputIsNull()
         {
             // Arrange
-            byte[] pdfBytes = null;
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = null };
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(pdfBytes));
+            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(pdfDocumentInput));
         }
 
 
         [Test]
         public void ExtractAllText_ThrowsExceptionWhenInputIsEmpty()
         {
+            // Arrange
+            var pdfDocumentInput = new PdfDocumentInput { PdfDocument = Array.Empty<byte>() };
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(Array.Empty<byte>()));
+            Assert.Throws<ArgumentNullException>(() => PdfTasks.ExtractAllText(pdfDocumentInput));
         }
 
         [Test]

@@ -257,9 +257,9 @@ namespace Frends.Kungsbacka.Pdf
 		/// <param name="regexPattern">Mandatory parameters</param>
 		/// <returns></returns>
 		/// <returns>string></returns>
-		public static string ExtractTextByRegex(byte[] pdfBytes, string regexPattern)
+		public static string ExtractTextByRegex([PropertyTab] PdfDocumentInput input, string regexPattern)
 		{
-			using (var memoryStream = new MemoryStream(pdfBytes))
+			using (var memoryStream = new MemoryStream(input.PdfDocument))
 			{
 				var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
 
@@ -288,14 +288,14 @@ namespace Frends.Kungsbacka.Pdf
         /// </summary>
         /// <param name="pdfBytes">The raw bytes of the PDF file to extract text from.</param>
         /// <returns>An array of strings where each element represents one line of text.</returns>
-        public static string[] ExtractAllText(byte[] pdfBytes)
+        public static string[] ExtractAllText([PropertyTab] PdfDocumentInput input)
         {
-            if (pdfBytes is null || pdfBytes.Length == 0)
+            if (input is null || input.PdfDocument is null || input.PdfDocument.Length == 0)
             {
-                throw new ArgumentNullException(nameof(pdfBytes));
+                throw new ArgumentNullException(nameof(input.PdfDocument));
             }
 
-            using var memoryStream = new MemoryStream(pdfBytes);
+            using var memoryStream = new MemoryStream(input.PdfDocument);
             using var pdfDocument = new PdfDocument(new PdfReader(memoryStream));
 
             var stringBuilder = new StringBuilder();
