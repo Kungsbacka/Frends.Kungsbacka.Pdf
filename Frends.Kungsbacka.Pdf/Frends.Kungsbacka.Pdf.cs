@@ -290,7 +290,7 @@ namespace Frends.Kungsbacka.Pdf
         /// <returns>An array of strings where each element represents one line of text.</returns>
         public static string[] ExtractAllText([PropertyTab] PdfDocumentInput input)
         {
-            if (input is null || input.PdfDocument is null || input.PdfDocument.Length == 0)
+            if (input?.PdfDocument is null || input.PdfDocument.Length == 0)
             {
                 throw new ArgumentNullException(nameof(input.PdfDocument));
             }
