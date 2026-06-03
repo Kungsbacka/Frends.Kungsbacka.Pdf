@@ -1,9 +1,11 @@
 using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -675,6 +677,92 @@ namespace Frends.Kungsbacka.Pdf.Tests
 
 			// Act & Assert
 			Assert.Throws<ArgumentNullException>(() => PdfTasks.MergePdfs(input));
+		}
+
+        [Test]
+		public void SplitPDF_SplitsPDFIntoMultiplePages()
+		{
+			// Arrange
+			var input = new PdfDocumentInput { PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages) };
+            var options = new SplitPdfOptions { PageCount = 1 };
+
+			// Act & Assert
+			var result = PdfTasks.SplitPdf(input, options);
+			Assert.IsNotEmpty(result);
+			Assert.AreEqual(2, result.Count);
+		}
+
+		[Test]
+		public void SplitPDF_PdfDocumentInputNullInput_ThrowsArgumentNullException ()
+		{
+			// Arrange
+			var input = new PdfDocumentInput { PdfDocument = null };
+            var options = new SplitPdfOptions { PageCount = 1 };
+			// Act & Assert
+			Assert.Throws<ArgumentNullException>(() => PdfTasks.SplitPdf(input, options));
+		}
+
+        [Test]
+		public void SplitPDF_NullInput_ThrowsArgumentNullException ()
+		{
+			// Arrange
+			PdfDocumentInput input = null;
+			var options = new SplitPdfOptions { PageCount = 1 };
+
+			// Act & Assert
+			Assert.Throws<ArgumentNullException>(() => PdfTasks.SplitPdf(input, options));
+		}
+
+        [Test]
+		public void SplitPDF_EmptyInput_ThrowsArgumentNullException ()
+		{
+			// Arrange
+			PdfDocumentInput input = new PdfDocumentInput { PdfDocument = Array.Empty<byte>() };
+			var options = new SplitPdfOptions { PageCount = 1 };
+
+			// Act & Assert
+			Assert.Throws<ArgumentNullException>(() => PdfTasks.SplitPdf(input, options));
+		}
+        [Test]
+        public void SplitPDF_SplitsPDFIntoSinglePageDocuments()
+        {
+            // Arrange
+            var input = new PdfDocumentInput
+            {
+                PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages)
+            };
+			var options = new SplitPdfOptions { PageCount = 1 };
+
+			// Act
+			var result = PdfTasks.SplitPdf(input, options);
+
+            // Assert
+            Assert.AreEqual(2, result.Count);
+
+            foreach (var splitPdf in result)
+            {
+                using var stream = new MemoryStream(splitPdf.PdfDocument);
+                using var reader = new PdfReader(stream);
+                using var pdfDoc = new PdfDocument(reader);
+
+                Assert.AreEqual(1, pdfDoc.GetNumberOfPages());
+            }
+        }
+		[Test]
+		public void SplitPDF_SplitsPDFIntoSingleDocumentWithTwoPagesWhenSettingPageCountTwo()
+		{
+			// Arrange
+			var input = new PdfDocumentInput
+			{
+				PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractTextMultiplePages)
+			};
+			var options = new SplitPdfOptions { PageCount = 2 };
+
+			// Act
+			var result = PdfTasks.SplitPdf(input, options);
+
+			// Assert
+			Assert.AreEqual(1, result.Count);
 		}
 	}
 }
