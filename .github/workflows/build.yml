@@ -45,7 +45,8 @@ jobs:
           MYGET_TASK_FEED_URL: ${{ secrets.MYGET_TASK_FEED_URL }}
           MYGET_TASK_FEED_API_KEY: ${{ secrets.MYGET_TASK_FEED_API_KEY }}
         run: |
-          dotnet nuget push "./nupkg/*.nupkg" `
+          $pkg = (Get-ChildItem -Path ./nupkg -Filter *.nupkg)[0].FullName
+          dotnet nuget push $pkg `
             --source "$env:MYGET_TASK_FEED_URL" `
             --api-key "$env:MYGET_TASK_FEED_API_KEY" `
             --skip-duplicate
