@@ -11,3 +11,4 @@ Tasks for manipulating Pdf documents
 |MergeEmbeddedPdfDocuments   |Extract embedded Pdf documents and add them as new pages at the end of an existing document.
 |RemoveAttachments           |Remove attached files from a document.
 |ConvertHtmlToPdf            |Convert html-files to PDF using wkhtmltopdf executable.
+|SplitPdf                    |Splits a pdf inte to a list of documents.
