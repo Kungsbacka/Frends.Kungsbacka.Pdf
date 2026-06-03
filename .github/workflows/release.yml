@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -18,7 +18,7 @@ jobs:
       - name: Verify tag is on main
         run: |
           git fetch origin main --depth=1
-          git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"
+          git merge-base --is-ancestor "$env:GITHUB_SHA" "origin/main"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -36,11 +36,11 @@ jobs:
 
       - name: Get task name
         id: get_task_name
-        run: echo "TASK_NAME=$(basename $(find . -name '*.sln') .sln)" >> $GITHUB_OUTPUT
+        run: echo "TASK_NAME=$((Get-ChildItem -Recurse -Filter '*.sln')[0].BaseName)" >> $env:GITHUB_OUTPUT
 
       - name: Pack release NuGet package
         run: |
-          dotnet pack --configuration Release --no-build --output ./nupkg \
+          dotnet pack --configuration Release --no-build --output ./nupkg `
             /p:PackageId="${{ steps.get_task_name.outputs.TASK_NAME }}"
 
       - name: Publish release package to MyGet v2
@@ -48,7 +48,7 @@ jobs:
           MYGET_TASK_FEED_URL: ${{ secrets.MYGET_TASK_FEED_URL }}
           MYGET_TASK_FEED_API_KEY: ${{ secrets.MYGET_TASK_FEED_API_KEY }}
         run: |
-          dotnet nuget push "./nupkg/*.nupkg" \
-            --source "$MYGET_TASK_FEED_URL" \
-            --api-key "$MYGET_TASK_FEED_API_KEY" \
+          dotnet nuget push "./nupkg/*.nupkg" `
+            --source "$env:MYGET_TASK_FEED_URL" `
+            --api-key "$env:MYGET_TASK_FEED_API_KEY" `
             --skip-duplicate
