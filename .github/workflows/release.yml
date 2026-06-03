@@ -1,0 +1,54 @@
+name: Release Frends Task
+on:
+  push:
+    tags:
+      - "v*.*.*"  # Runs when a version tag like v1.2.3 is pushed.
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main
+        run: |
+          git fetch origin main --depth=1
+          git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Get task name
+        id: get_task_name
+        run: echo "TASK_NAME=$(basename $(find . -name '*.sln') .sln)" >> $GITHUB_OUTPUT
+
+      - name: Pack release NuGet package
+        run: |
+          dotnet pack --configuration Release --no-build --output ./nupkg \
+            /p:PackageId="${{ steps.get_task_name.outputs.TASK_NAME }}"
+
+      - name: Publish release package to MyGet v2
+        env:
+          MYGET_TASK_FEED_URL: ${{ secrets.MYGET_TASK_FEED_URL }}
+          MYGET_TASK_FEED_API_KEY: ${{ secrets.MYGET_TASK_FEED_API_KEY }}
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "$MYGET_TASK_FEED_URL" \
+            --api-key "$MYGET_TASK_FEED_API_KEY" \
+            --skip-duplicate

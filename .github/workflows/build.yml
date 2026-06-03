@@ -1,0 +1,52 @@
+name: Build Frends Task
+on:
+  push:
+    branches:
+      - "**"  # Runs on pushes to any branch name, including names with slashes. A PR merge to main also creates a push to main, so that case is covered too.
+jobs:
+  build-and-prerelease:
+    name: Build and Prerelease
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Get task name
+        id: get_task_name
+        if: ${{ github.ref_name != 'main' }}
+        run: echo "TASK_NAME=$(basename $(find . -name '*.sln') .sln)" >> $GITHUB_OUTPUT
+
+      - name: Pack NuGet package
+        if: ${{ github.ref_name != 'main' }}
+        run: |
+          dotnet pack --configuration Release --no-build --output ./nupkg \
+            /p:PackageId="${{ steps.get_task_name.outputs.TASK_NAME }}"
+
+      - name: Publish prerelease package to MyGet v2
+        if: ${{ github.ref_name != 'main' }}
+        env:
+          MYGET_TASK_FEED_URL: ${{ secrets.MYGET_TASK_FEED_URL }}
+          MYGET_TASK_FEED_API_KEY: ${{ secrets.MYGET_TASK_FEED_API_KEY }}
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "$MYGET_TASK_FEED_URL" \
+            --api-key "$MYGET_TASK_FEED_API_KEY" \
+            --skip-duplicate
+  
