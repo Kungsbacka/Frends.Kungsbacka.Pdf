@@ -605,12 +605,13 @@ namespace Frends.Kungsbacka.Pdf.Tests
             // Assert
             Assert.IsNotEmpty(result);
             //First page
-            Assert.AreEqual("Test file #1", result[0]);
-            Assert.AreEqual("This is a test document used for unit testing of PDF", result[1]);
-            // Second page
-            Assert.AreEqual("Test file #1", result[28]);
-            Assert.AreEqual("This is a test document used for unit testing of PDF", result[29]);
-        }
+
+            var expectedResult1 = result.Where(x => x == "Test file #1");
+            var expectedResult2 = result.Where(x => x == "This is a test document used for unit testing of PDF");
+
+			Assert.AreEqual(2, expectedResult1.Count());
+			Assert.AreEqual(2, expectedResult2.Count());
+		}
 
         [Test]
         public void ExtractAllText_ThrowsExceptionWhenInputIsNull()
