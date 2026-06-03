@@ -11,6 +11,7 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
@@ -369,9 +370,26 @@ namespace Frends.Kungsbacka.Pdf
                 doc.ShowTextAligned(footer, x, y, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
             }
         }
+		internal class MemoryPdfSplitter : PdfSplitter
+		{
+			private readonly List<MemoryStream> _streams = new List<MemoryStream>();
 
+			internal MemoryPdfSplitter(PdfDocument pdfDoc) : base(pdfDoc) { }
 
-        private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
+			protected override PdfWriter GetNextPdfWriter(PageRange documentPageRange)
+			{
+				var ms = new MemoryStream();
+				_streams.Add(ms);
+				return new PdfWriter(ms);
+			}
+
+			public List<byte[]> GetDocuments()
+			{
+				return _streams.Select(ms => ms.ToArray()).ToList();
+			}
+		}
+
+		private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
             var array = pdfDocument
                 ?.GetCatalog()

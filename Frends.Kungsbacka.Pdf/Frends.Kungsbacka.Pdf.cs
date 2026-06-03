@@ -4,13 +4,13 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Kernel.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using static Frends.Kungsbacka.Pdf.PdfTools;
 using PdfDocument = iText.Kernel.Pdf.PdfDocument;
 
 namespace Frends.Kungsbacka.Pdf
@@ -355,6 +355,45 @@ namespace Frends.Kungsbacka.Pdf
 
 			return output;
 		}
+
+
+		/// <summary>
+		/// Splits a PDF document into multiple PDF documents, each containing the specified number of pages.
+		/// </summary>
+		/// <param name="input">Mandatory parameters</param>
+		/// <param name="splitPdfOptions">Options SplitPdf</param>
+		/// <returns>
+        /// A list of PdfDocumentResult where each item contains one split PDF document as a byte array.
+        /// </returns>
+		public static List<PdfDocumentResult> SplitPdf([PropertyTab] PdfDocumentInput input, [PropertyTab] SplitPdfOptions splitPdfOptions)
+		{
+			if (input is null)
+			{
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (input.PdfDocument is null || input.PdfDocument.Length == 0)
+            {
+                throw new ArgumentNullException(nameof(input.PdfDocument));
+            }
+
+			using var memoryStream = new MemoryStream(input.PdfDocument);
+            using var pdfReader = new PdfReader(memoryStream);
+			pdfReader.SetUnethicalReading(true);
+
+			using var pdfDocument = new PdfDocument(pdfReader);
+            
+			var pdfSplitter = new MemoryPdfSplitter(pdfDocument);
+			var splittedDocuments = pdfSplitter.SplitByPageCount(splitPdfOptions.PageCount);
+
+            foreach (var doc in splittedDocuments)
+            {
+                doc.Close();
+            }
+			
+			return pdfSplitter.GetDocuments().Select(x => new PdfDocumentResult { PdfDocument = x }).ToList();
+		}
+
 		private class Pdf
         {
             private readonly PdfDocument _document;

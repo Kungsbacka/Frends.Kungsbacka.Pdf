@@ -26,6 +26,9 @@
 		},
 		{
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.ExtractAllText"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.SplitPdf"
 		}
 	]
 }
