@@ -765,5 +765,37 @@ namespace Frends.Kungsbacka.Pdf.Tests
 			// Assert
 			Assert.AreEqual(1, result.Count);
 		}
+		[Test]
+		public void SplitPDF_SplitsPDFIntoSinglePageDocumentsWithDifferentPages()
+		{
+			// Arrange
+			var input = new PdfDocumentInput
+			{
+				PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.MultipleDifferentPages)
+			};
+			var options = new SplitPdfOptions { PageCount = 1 };
+			// Act
+			var result = PdfTasks.SplitPdf(input, options);
+
+			// Assert
+			 Assert.AreEqual(2, result.Count);
+
+            using var firstStream = new MemoryStream(result[0].PdfDocument);
+            using var firstReader = new PdfReader(firstStream);
+            using var firstPdf = new PdfDocument(firstReader);
+
+            using var secondStream = new MemoryStream(result[1].PdfDocument);
+            using var secondReader = new PdfReader(secondStream);
+            using var secondPdf = new PdfDocument(secondReader);
+
+            Assert.AreEqual(1, firstPdf.GetNumberOfPages());
+            Assert.AreEqual(1, secondPdf.GetNumberOfPages());
+
+            var firstText = PdfTextExtractor.GetTextFromPage(firstPdf.GetFirstPage());
+            var secondText = PdfTextExtractor.GetTextFromPage(secondPdf.GetFirstPage());
+
+            Assert.AreNotEqual(firstText, secondText);
+
+		}
 	}
 }
