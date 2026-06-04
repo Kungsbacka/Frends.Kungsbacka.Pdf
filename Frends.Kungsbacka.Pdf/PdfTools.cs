@@ -383,9 +383,15 @@ namespace Frends.Kungsbacka.Pdf
 				return new PdfWriter(ms);
 			}
 
-			public List<byte[]> GetDocuments()
+			public List<byte[]> SplitToByteArrays(int pageCount)
 			{
+				SplitByPageCount(pageCount, new CloseOnReady());
 				return _streams.Select(ms => ms.ToArray()).ToList();
+			}
+
+			private sealed class CloseOnReady : IDocumentReadyListener
+			{
+				public void DocumentReady(PdfDocument doc, PageRange range) => doc.Close();
 			}
 		}
 

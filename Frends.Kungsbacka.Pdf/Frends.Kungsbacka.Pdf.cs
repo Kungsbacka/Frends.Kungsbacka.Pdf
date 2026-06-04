@@ -384,14 +384,10 @@ namespace Frends.Kungsbacka.Pdf
 			using var pdfDocument = new PdfDocument(pdfReader);
             
 			var pdfSplitter = new MemoryPdfSplitter(pdfDocument);
-			var splittedDocuments = pdfSplitter.SplitByPageCount(splitPdfOptions.PageCount);
 
-            foreach (var doc in splittedDocuments)
-            {
-                doc.Close();
-            }
-			
-			return pdfSplitter.GetDocuments().Select(x => new PdfDocumentResult { PdfDocument = x }).ToList();
+			return pdfSplitter.SplitToByteArrays(splitPdfOptions.PageCount)
+				.Select(bytes => new PdfDocumentResult { PdfDocument = bytes })
+				.ToList();
 		}
 
 		private class Pdf
