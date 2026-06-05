@@ -10,6 +10,7 @@
     <PackageTags>Frends</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>1.7.1</Version>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
 	<LangVersion>8</LangVersion>
   </PropertyGroup>
 
@@ -23,6 +24,7 @@
     <PackageReference Include="Haukcode.WkHtmlToPdfDotNet" Version="1.5.95" />
     <PackageReference Include="itext7" Version="7.2.5" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="MinVer" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.4" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />

@@ -11,6 +11,7 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
@@ -369,9 +370,9 @@ namespace Frends.Kungsbacka.Pdf
                 doc.ShowTextAligned(footer, x, y, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
             }
         }
+		
 
-
-        private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
+		private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
             var array = pdfDocument
                 ?.GetCatalog()

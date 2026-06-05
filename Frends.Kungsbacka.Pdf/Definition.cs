@@ -265,4 +265,15 @@ namespace Frends.Kungsbacka.Pdf
         [DefaultValue(true)]
         public bool DisableSmartShrinking { get; set; } = true;
     }
+	/// <summary>
+	/// Optional parameters for task SplitPdf
+	/// </summary>
+	public class SplitPdfOptions
+	{
+        /// <summary>
+        /// Number of pages per split PDF document
+        /// </summary>
+        [DefaultValue(1)]
+        public int PageCount { get; set; } = 1;
+	}
 }
