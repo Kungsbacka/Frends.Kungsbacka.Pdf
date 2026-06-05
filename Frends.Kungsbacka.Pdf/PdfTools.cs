@@ -370,30 +370,7 @@ namespace Frends.Kungsbacka.Pdf
                 doc.ShowTextAligned(footer, x, y, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
             }
         }
-		internal class MemoryPdfSplitter : PdfSplitter
-		{
-			private readonly List<MemoryStream> _streams = new List<MemoryStream>();
-
-			internal MemoryPdfSplitter(PdfDocument pdfDoc) : base(pdfDoc) { }
-
-			protected override PdfWriter GetNextPdfWriter(PageRange documentPageRange)
-			{
-				var ms = new MemoryStream();
-				_streams.Add(ms);
-				return new PdfWriter(ms);
-			}
-
-			public List<byte[]> SplitToByteArrays(int pageCount)
-			{
-				SplitByPageCount(pageCount, new CloseOnReady());
-				return _streams.Select(ms => ms.ToArray()).ToList();
-			}
-
-			private sealed class CloseOnReady : IDocumentReadyListener
-			{
-				public void DocumentReady(PdfDocument doc, PageRange range) => doc.Close();
-			}
-		}
+		
 
 		private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
