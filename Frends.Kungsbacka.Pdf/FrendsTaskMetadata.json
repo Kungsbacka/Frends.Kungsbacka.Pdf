@@ -29,6 +29,9 @@
 		},
 		{
 			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.SplitPdf"
+		},
+		{
+			"TaskMethod": "Frends.Kungsbacka.Pdf.PdfTasks.TrimDocumentAbove"
 		}
 	]
 }
