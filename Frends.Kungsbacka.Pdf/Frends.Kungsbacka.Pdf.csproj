@@ -18,12 +18,13 @@
     <None Include="FrendsTaskMetadata.json" Pack="true" PackagePath="/">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(Pkgitext7_pdfsweep)\lib\net461\itext.cleanup.dll" Pack="true" PackagePath="lib\net8.0" Visible="false" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Haukcode.WkHtmlToPdfDotNet" Version="1.5.95" />
     <PackageReference Include="itext7" Version="7.2.5" />
-    <PackageReference Include="itext7.pdfsweep" Version="3.0.2" />
+    <PackageReference Include="itext7.pdfsweep" Version="3.0.2" PrivateAssets="all" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="MinVer" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
