@@ -198,6 +198,37 @@ namespace Frends.Kungsbacka.Pdf
         [DisplayFormat(DataFormatString = "Text")]
         public string Text { get; set; }
     }
+
+    /// <summary>
+    /// Required parameters for task TrimDocumentAbove
+    /// </summary>
+    public class TrimDocumentAboveInput
+    {
+        /// <summary>
+        /// Pdf document
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Expression")]
+        public byte[] PdfDocument { get; set; }
+
+        /// <summary>
+        /// Text marking the upper edge of the content to keep. Everything above the text is removed.
+        /// </summary>
+        [DisplayFormat(DataFormatString = "Text")]
+        public string SearchText { get; set; }
+    }
+
+    /// <summary>
+    /// Optional parameters for task TrimDocumentAbove
+    /// </summary>
+    public class TrimDocumentAboveOptions
+    {
+        /// <summary>
+        /// Offset in points (1/72 inch, about 0.35 mm) from the top of the found text.
+        /// A positive value moves the cut down (below the top of the text), a negative value moves it up. Default is 0.
+        /// </summary>
+        [DefaultValue(0)]
+        public float Offset { get; set; }
+    }
     /// <summary>
     /// Required parameters for task ConvertHtmlToPdfInput
     /// </summary>

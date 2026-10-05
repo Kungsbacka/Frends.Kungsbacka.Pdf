@@ -390,6 +390,40 @@ namespace Frends.Kungsbacka.Pdf
 				.ToList();
 		}
 
+        /// <summary>
+        /// Removes all pages and page content above the first occurrence of a text and moves the
+        /// remaining content on that page up to the top. Page size is preserved and following pages
+        /// are left untouched. If the text is not found, the document is returned unchanged.
+        /// </summary>
+        /// <param name="input">Mandatory parameters</param>
+        /// <param name="options">Optional parameters</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <returns>PdfDocumentResult {byte[] PdfDocument}</returns>
+        public static PdfDocumentResult TrimDocumentAbove([PropertyTab] TrimDocumentAboveInput input, [PropertyTab] TrimDocumentAboveOptions options)
+        {
+            if (input is null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+            if (input.PdfDocument is null)
+            {
+                throw new ArgumentNullException(nameof(input.PdfDocument));
+            }
+            if (string.IsNullOrWhiteSpace(input.SearchText))
+            {
+                throw new ArgumentException("SearchText must not be empty", nameof(input.SearchText));
+            }
+            var pdf = new Pdf(input.PdfDocument);
+
+            PdfTools.TrimDocumentAbove(pdf.Document, input.SearchText, options?.Offset ?? 0);
+
+            return new PdfDocumentResult
+            {
+                PdfDocument = pdf.ToArray()
+            };
+        }
+
 		private class Pdf
         {
             private readonly PdfDocument _document;

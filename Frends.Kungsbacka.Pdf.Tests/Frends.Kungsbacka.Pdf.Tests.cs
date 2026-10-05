@@ -798,5 +798,127 @@ namespace Frends.Kungsbacka.Pdf.Tests
             Assert.AreNotEqual(firstText, secondText);
 
 		}
+
+        [Test]
+        public void TrimDocumentAbove_RemovesContentAboveAndMovesTextToTop()
+        {
+            // Arrange
+            const string searchText = "Test PDF";
+            var pdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.MultipleDifferentPages);
+            var input = new TrimDocumentAboveInput { PdfDocument = pdfDocument, SearchText = searchText };
+
+            // Act
+            var options = new TrimDocumentAboveOptions { Offset = 30};
+			var result = PdfTasks.TrimDocumentAbove(input, options);
+
+            TestHelper.SaveResult("trim-document-above-test-result.pdf", result.PdfDocument);
+        }
+
+        [Test]
+        public void TrimDocumentAbove_RemovesPagesBeforeMatch()
+        {
+            // Arrange
+            var original = CreateDocument(
+				new[] { "First page" },
+				new[] { "Above marker", "Marker text", "Below marker" },
+                new[] { "Last page" });
+            var input = new TrimDocumentAboveInput { PdfDocument = original, SearchText = "Marker text" };
+
+            // Act
+            var result = PdfTasks.TrimDocumentAbove(input, new TrimDocumentAboveOptions());
+
+            // Assert
+            var pdf = TestHelper.BytesToPdf(result.PdfDocument);
+            Assert.AreEqual(2, pdf.GetNumberOfPages());
+            var firstPageText = PdfTextExtractor.GetTextFromPage(pdf.GetPage(1));
+            StringAssert.DoesNotContain("First page", firstPageText);
+            StringAssert.DoesNotContain("Above marker", firstPageText);
+            StringAssert.Contains("Marker text", firstPageText);
+            StringAssert.Contains("Below marker", firstPageText);
+            StringAssert.Contains("Last page", PdfTextExtractor.GetTextFromPage(pdf.GetPage(2)));
+        }
+
+        [Test]
+        public void TrimDocumentAbove_PositiveOffset_CutsBelowFoundText()
+        {
+            // Arrange
+            var original = CreateDocument(new[] { "Above marker", "Marker text", "Below marker" });
+            var originalPage = TestHelper.BytesToPdf(original).GetFirstPage();
+            float markerTop = GetTopmostTextTop(originalPage, "Marker text");
+            float belowTop = GetTopmostTextTop(originalPage, "Below marker");
+            var input = new TrimDocumentAboveInput { PdfDocument = original, SearchText = "Marker text" };
+            var options = new TrimDocumentAboveOptions { Offset = markerTop - belowTop };
+
+            // Act
+            var result = PdfTasks.TrimDocumentAbove(input, options);
+
+            // Assert
+            var page = TestHelper.BytesToPdf(result.PdfDocument).GetFirstPage();
+            var text = PdfTextExtractor.GetTextFromPage(page);
+            StringAssert.DoesNotContain("Above marker", text);
+            StringAssert.DoesNotContain("Marker text", text);
+            StringAssert.Contains("Below marker", text);
+            Assert.AreEqual(page.GetCropBox().GetTop(), GetTopmostTextTop(page, "Below marker"), 1f);
+        }
+
+        [Test]
+        public void TrimDocumentAbove_TextNotFound_ReturnsUnchangedDocument()
+        {
+            // Arrange
+            var original = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText);
+            var input = new TrimDocumentAboveInput { PdfDocument = original, SearchText = "TextThatShouldBeMissing" };
+
+            // Act
+            var result = PdfTasks.TrimDocumentAbove(input, new TrimDocumentAboveOptions());
+
+            // Assert
+            var expected = TestHelper.BytesToPdf(original);
+            var actual = TestHelper.BytesToPdf(result.PdfDocument);
+            Assert.AreEqual(expected.GetNumberOfPages(), actual.GetNumberOfPages());
+            Assert.AreEqual(
+                PdfTextExtractor.GetTextFromPage(expected.GetFirstPage()),
+                PdfTextExtractor.GetTextFromPage(actual.GetFirstPage()));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("  ")]
+        public void TrimDocumentAbove_EmptySearchText_ThrowsArgumentException(string searchText)
+        {
+            var input = new TrimDocumentAboveInput
+            {
+                PdfDocument = TestHelper.GetTestDocument(TestHelper.TestDocumentTypes.ExtractText),
+                SearchText = searchText
+            };
+
+            Assert.Throws<ArgumentException>(() => PdfTasks.TrimDocumentAbove(input, new TrimDocumentAboveOptions()));
+        }
+
+        private static float GetTopmostTextTop(PdfPage page, string text)
+        {
+            var strategy = new RegexBasedLocationExtractionStrategy(Regex.Escape(text));
+            new PdfCanvasProcessor(strategy).ProcessPageContent(page);
+            return strategy.GetResultantLocations().Max(l => l.GetRectangle().GetTop());
+        }
+
+        private static byte[] CreateDocument(params string[][] pages)
+        {
+            using var stream = new MemoryStream();
+            using (var document = new iText.Layout.Document(new PdfDocument(new PdfWriter(stream))))
+            {
+                for (int i = 0; i < pages.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        document.Add(new iText.Layout.Element.AreaBreak());
+                    }
+                    foreach (var line in pages[i])
+                    {
+                        document.Add(new iText.Layout.Element.Paragraph(line));
+                    }
+                }
+            }
+            return stream.ToArray();
+        }
 	}
 }

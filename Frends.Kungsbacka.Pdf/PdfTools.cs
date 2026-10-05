@@ -5,10 +5,13 @@ using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Kernel.Utils;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using iText.PdfCleanup;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -371,6 +374,64 @@ namespace Frends.Kungsbacka.Pdf
             }
         }
 		
+        /// <summary>
+        /// Removes all pages and page content above the first occurrence of searchText and
+        /// moves the remaining content on that page up to the top. Page size is preserved and
+        /// following pages are left untouched. If the text occurs more than once on the page,
+        /// the topmost occurrence is used.
+        /// </summary>
+        /// <param name="pdfDocument">Pdf document to trim</param>
+        /// <param name="searchText">Text marking the upper edge of the retained content</param>
+        /// <param name="offset">Offset in points from the top of the found text. Positive moves the cut down, negative moves it up.</param>
+        public static void TrimDocumentAbove(PdfDocument pdfDocument, string searchText, float offset = 0)
+        {
+            int foundPageNum = 0;
+            Rectangle foundRect = null;
+            for (int pageNum = 1; pageNum <= pdfDocument.GetNumberOfPages(); pageNum++)
+            {
+                var strategy = new RegexBasedLocationExtractionStrategy(Regex.Escape(searchText));
+                new PdfCanvasProcessor(strategy).ProcessPageContent(pdfDocument.GetPage(pageNum));
+                foundRect = strategy.GetResultantLocations()
+                    .Select(l => l.GetRectangle())
+                    .OrderByDescending(r => r.GetTop())
+                    .FirstOrDefault();
+                if (foundRect != null)
+                {
+                    foundPageNum = pageNum;
+                    break;
+                }
+            }
+            if (foundRect is null)
+            {
+                return;
+            }
+
+            for (int pageNum = foundPageNum - 1; pageNum >= 1; pageNum--)
+            {
+                pdfDocument.RemovePage(pageNum);
+            }
+
+            PdfPage page = pdfDocument.GetPage(1);
+            Rectangle box = page.GetCropBox();
+            float trimTop = Math.Min(Math.Max(foundRect.GetTop() - offset, box.GetBottom()), box.GetTop());
+            float trimHeight = box.GetTop() - trimTop;
+            if (trimHeight <= 0)
+            {
+                return;
+            }
+
+            var areaAbove = new Rectangle(box.GetLeft(), trimTop, box.GetWidth(), trimHeight);
+            PdfCleaner.CleanUp(pdfDocument, new List<PdfCleanUpLocation> { new PdfCleanUpLocation(1, areaAbove) });
+
+            // Wrap existing content in q/Q so content added later does not inherit the translation.
+            // Q is written raw since PdfCanvas refuses a RestoreState without a matching SaveState.
+            new PdfCanvas(page.NewContentStreamBefore(), page.GetResources(), pdfDocument)
+                .SaveState()
+                .ConcatMatrix(1, 0, 0, 1, 0, trimHeight);
+            page.NewContentStreamAfter().GetOutputStream().WriteString("\nQ\n");
+
+            return;
+        }
 
 		private static PdfArray GetFileSpecArray(PdfDocument pdfDocument)
         {
