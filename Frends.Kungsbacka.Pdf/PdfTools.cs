@@ -423,12 +423,18 @@ namespace Frends.Kungsbacka.Pdf
             var areaAbove = new Rectangle(box.GetLeft(), trimTop, box.GetWidth(), trimHeight);
             PdfCleaner.CleanUp(pdfDocument, new List<PdfCleanUpLocation> { new PdfCleanUpLocation(1, areaAbove) });
 
-            // Wrap existing content in q/Q so content added later does not inherit the translation.
-            // Q is written raw since PdfCanvas refuses a RestoreState without a matching SaveState.
-            new PdfCanvas(page.NewContentStreamBefore(), page.GetResources(), pdfDocument)
-                .SaveState()
-                .ConcatMatrix(1, 0, 0, 1, 0, trimHeight);
-            page.NewContentStreamAfter().GetOutputStream().WriteString("\nQ\n");
+			// Rewrite the page as a single content stream with balanced q/Q, so tools that
+			// later append content (e.g. stamps) cannot end up inside.
+			var originalContent = page.GetContentBytes();
+
+            var contentStream = (PdfStream)new PdfStream().MakeIndirect(pdfDocument);
+
+            var canvas = new PdfCanvas(contentStream, page.GetResources(), pdfDocument);
+            canvas.SaveState().ConcatMatrix(1, 0, 0, 1, 0, trimHeight);
+            contentStream.GetOutputStream().WriteNewLine().WriteBytes(originalContent).WriteNewLine();
+            canvas.RestoreState();
+
+            page.Put(PdfName.Contents, contentStream);
 
             return;
         }
